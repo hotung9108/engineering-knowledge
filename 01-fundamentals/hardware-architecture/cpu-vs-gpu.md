@@ -60,9 +60,12 @@ graph TD
     end
 
     subgraph "GPU Architecture"
-        G1[Core] G2[Core] G3[Core] G4[Core] G5[Core] G6[Core] G7[Core] G8[Core]
-        G9[Core] G10[Core] G11[Core] G12[Core] G13[Core] G14[Core] G15[Core] G16[Core]
-        G17[...] --- GC[Tiny Shared Cache]
+        GC[Tiny Shared Cache]
+        G1[Core] --- GC
+        G2[Core] --- GC
+        G3[Core] --- GC
+        G4[Core] --- GC
+        G5[...] --- GC
     end
 ```
 
