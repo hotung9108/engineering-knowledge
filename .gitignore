@@ -1,0 +1,26 @@
+# Agent configuration
+.agents/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Submodules (these will be tracked via .gitmodules, but ignoring local uncommitted files in them is fine if they are truly submodules, though standard git behavior covers this)
+# 11-projects/
+# 12-code-templates/
+
+# Standard ignores
+node_modules/
+dist/
+build/
+*.class
+*.jar
+*.war
+target/
+.env
+__pycache__/
+*.pyc
+venv/
+env/

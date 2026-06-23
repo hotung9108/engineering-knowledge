@@ -1,29 +1,29 @@
-#  Engineering Knowledge Base
+# Engineering Knowledge Base
 
-> Kho kiến thức toàn diện về **Software Engineering** — từ lý thuyết nền tảng đến best practices nâng cao, phục vụ cho Backend, Frontend, Data, DevOps, Cloud, và AI Engineering.
+> A comprehensive knowledge base covering Software Engineering — from foundational theory to advanced best practices, catering to Backend, Frontend, Data, DevOps, Cloud, and AI Engineering.
 
 ---
 
-##  Mục tiêu
+## Objectives
 
-Knowledge base này được xây dựng để trả lời **6 câu hỏi cốt lõi** cho mỗi công nghệ/concept:
+This knowledge base is designed to address **6 core questions** for every technology or concept:
 
-| Layer | Câu hỏi | Mục đích |
+| Layer | Question | Purpose |
 |---|---|---|
-|  What | Nó là gì? | Hiểu bản chất, kiến trúc tổng quan |
-|  Why | Tại sao nó tồn tại? | Hiểu vấn đề được giải quyết |
-|  Compare | Không dùng vs Có dùng? | Thấy rõ giá trị thực tế |
-|  Use Cases | Thường dùng để làm gì? | Biết khi nào áp dụng |
-|  Deep Practice | Kinh nghiệm thực tế? | Thuần thục sử dụng |
-|  Templates | Code template nào? | Áp dụng ngay vào project |
+| What | What is it? | To understand the nature and high-level architecture. |
+| Why | Why does it exist? | To understand the specific problems it solves. |
+| Compare | Without vs. With? | To clearly observe its practical value and improvements. |
+| Use Cases | When is it used? | To identify appropriate application scenarios. |
+| Deep Practice | What are the real-world experiences? | To attain proficiency through best practices and pitfalls. |
+| Templates | What are the code templates? | To immediately apply the technology into a project. |
 
 ---
 
-##  Learning Paths
+## Learning Paths
 
 ```mermaid
 graph LR
-    A["01 Fundamentals<br/>Nền tảng CS"] --> B["02 Concepts<br/>Architecture Patterns"]
+    A["01 Fundamentals<br/>CS Foundations"] --> B["02 Concepts<br/>Architecture Patterns"]
     B --> C["03 Technologies<br/>Deep Dive"]
     C --> D1["04 Frontend Eng."]
     C --> D2["05 Backend Eng."]
@@ -39,55 +39,42 @@ graph LR
     D6 --> E
     E --> F["11 Projects<br/>Hands-on"]
     F --> G["12 Code Templates<br/>Production-ready"]
-
-    style A fill:#4CAF50,color:#fff
-    style B fill:#2196F3,color:#fff
-    style C fill:#FF9800,color:#fff
-    style D1 fill:#E91E63,color:#fff
-    style D2 fill:#9C27B0,color:#fff
-    style D3 fill:#00BCD4,color:#fff
-    style D4 fill:#FF5722,color:#fff
-    style D5 fill:#3F51B5,color:#fff
-    style D6 fill:#795548,color:#fff
-    style E fill:#F44336,color:#fff
-    style F fill:#607D8B,color:#fff
-    style G fill:#009688,color:#fff
 ```
 
 ---
 
-##  Cấu trúc
+## Structure
 
-### Nền tảng
+### Foundations
 
-| # | Section | Mô tả | Status |
+| # | Section | Description | Status |
 |---|---|---|---|
-| 01 | [Fundamentals](./01-fundamentals/) | CS foundations: OOP, SOLID, Data Structures, Networking, OS, Git, Security |  In Progress |
-| 02 | [Concepts](./02-concepts/) | Architecture patterns: Caching, Messaging, Resilience, Event-driven, Scalability |  Planned |
-| 03 | [Technologies](./03-technologies/) | Deep dive: Spring Boot, Redis, Kafka, PostgreSQL, Docker, AWS... |  Planned |
+| 01 | [Fundamentals](./01-fundamentals/) | Computer Science foundations: OOP, SOLID, Data Structures, Networking, OS, Git, Security. | In Progress |
+| 02 | [Concepts](./02-concepts/) | Architecture patterns: Caching, Messaging, Resilience, Event-driven, Scalability. | Planned |
+| 03 | [Technologies](./03-technologies/) | Deep dives: Spring Boot, Redis, Kafka, PostgreSQL, Docker, AWS, etc. | Planned |
 
-###  Learning Paths
+### Learning Paths
 
-| # | Section | Mô tả | Status |
+| # | Section | Description | Status |
 |---|---|---|---|
-| 04 | [Frontend Engineering](./04-frontend-engineering/) | ReactJS, Next.js, TypeScript, State Management, Styling |  Planned |
-| 05 | [Backend Engineering](./05-backend-engineering/) | API Design, Architecture, Testing, Production Readiness |  Planned |
-| 06 | [Data Engineering](./06-data-engineering/) | ETL/ELT, Data Pipelines, Spark, Airflow, Data Governance |  Planned |
-| 07 | [DevOps Engineering](./07-devops-engineering/) | CI/CD, Kubernetes, Terraform, Monitoring, SRE |  Planned |
-| 08 | [Cloud Engineering](./08-cloud-engineering/) | AWS Deep Dive, Serverless, Multi-region, Cost Optimization |  Planned |
-| 09 | [AI Engineering](./09-ai-engineering/) | ML, Deep Learning, LLM, RAG, MLOps |  Planned |
+| 04 | [Frontend Engineering](./04-frontend-engineering/) | ReactJS, Next.js, TypeScript, State Management, Styling. | Planned |
+| 05 | [Backend Engineering](./05-backend-engineering/) | API Design, Architecture, Testing, Production Readiness. | Planned |
+| 06 | [Data Engineering](./06-data-engineering/) | ETL/ELT, Data Pipelines, Spark, Airflow, Data Governance. | Planned |
+| 07 | [DevOps Engineering](./07-devops-engineering/) | CI/CD, Kubernetes, Terraform, Monitoring, Site Reliability Engineering. | Planned |
+| 08 | [Cloud Engineering](./08-cloud-engineering/) | AWS Deep Dive, Serverless architecture, Multi-region strategies, Cost Optimization. | Planned |
+| 09 | [AI Engineering](./09-ai-engineering/) | Machine Learning, Deep Learning, LLM, RAG, MLOps. | Planned |
 
-###  Thực hành
+### Practical Application
 
-| # | Section | Mô tả | Status |
+| # | Section | Description | Status |
 |---|---|---|---|
-| 10 | [System Design](./10-system-design/) | Case studies: Chat system, Payment, E-commerce... |  Planned |
-| 11 | [Projects](./11-projects/) | Hands-on integration projects kết hợp nhiều công nghệ |  Planned |
-| 12 | [Code Templates](./12-code-templates/) | Production-ready boilerplate code + hướng dẫn |  Planned |
+| 10 | [System Design](./10-system-design/) | Case studies: Chat systems, Payment gateways, E-commerce platforms. | Planned |
+| 11 | [Projects](./11-projects/) | Hands-on integration projects combining multiple technologies. | Planned |
+| 12 | [Code Templates](./12-code-templates/) | Production-ready boilerplate code accompanied by usage guides. | Planned |
 
 ---
 
-##  Tech Stack chính
+## Primary Technology Stack
 
 | Category | Technologies |
 |---|---|
@@ -97,17 +84,17 @@ graph LR
 | **Messaging** | Apache Kafka, RabbitMQ |
 | **Data** | Apache Spark, Apache Airflow, dbt |
 | **DevOps** | Docker, Kubernetes, Terraform, GitHub Actions |
-| **Cloud** | AWS (primary), GCP, Azure (comparison) |
+| **Cloud** | AWS (Primary), GCP, Azure (For comparison) |
 | **AI/ML** | Python, PyTorch, LangChain, OpenAI API |
 | **Monitoring** | Prometheus, Grafana, ELK Stack, OpenTelemetry |
 
 ---
 
-##  Quy tắc viết
+## Writing Rules
 
-- **Ngôn ngữ**: Tiếng Việt + thuật ngữ tiếng Anh (giữ nguyên tên công nghệ, patterns, concepts)
-- **Format**: Template 6 layers cho mỗi chủ đề
-- **Code**: Production-grade, compilable/runnable, có error handling
-- **Templates**: Actual runnable code + markdown hướng dẫn
+- **Language**: Formal English.
+- **Format**: The 6-layer template must be utilized for each topic.
+- **Code**: Must be production-grade, compilable/runnable, and include error handling.
+- **Templates**: Provide actual runnable code alongside markdown instruction guides.
 
-<!-- > Chi tiết quy tắc xem tại [.agents/](./.agents/) -->
+<!-- Detailed rules can be found in the [.agents/](./.agents/) directory. -->
