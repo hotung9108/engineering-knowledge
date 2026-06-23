@@ -65,7 +65,7 @@ graph TD
         G2[Core] --- GC
         G3[Core] --- GC
         G4[Core] --- GC
-        G5[...] --- GC
+        G5["..."] --- GC
     end
 ```
 
