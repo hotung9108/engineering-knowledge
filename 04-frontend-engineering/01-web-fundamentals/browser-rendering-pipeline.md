@@ -1,75 +1,196 @@
-# Browser Rendering Pipeline (Advanced)
+# Browser Rendering Pipeline
 
-Hiểu rõ cách trình duyệt render trang web từ HTML/CSS/JS thành các pixel trên màn hình là kỹ năng bắt buộc để tối ưu hoá hiệu năng (Web Performance Optimization).
-
-## Critical Rendering Path (CRP)
-
-Quá trình trình duyệt chuyển đổi mã nguồn thành màn hình hiển thị trải qua các bước sau:
-
-1. **Parsing HTML & Xây dựng DOM Tree**
-   - Trình duyệt nhận raw bytes, convert thành ký tự, token hóa (tag), và xây dựng DOM (Document Object Model) tree.
-   - Khi gặp thẻ `<script>` đồng bộ (không có `async` hoặc `defer`), quá trình parse HTML bị block (Render-blocking).
-
-2. **Parsing CSS & Xây dựng CSSOM Tree**
-   - Giống như HTML, CSS được parse thành CSSOM (CSS Object Model).
-   - CSS là **Render-blocking resource**. Trình duyệt sẽ không render bất kỳ nội dung nào cho đến khi CSSOM hoàn thiện để tránh hiện tượng FOUC (Flash of Unstyled Content).
-
-3. **Render Tree Construction**
-   - DOM và CSSOM được combine lại thành Render Tree.
-   - Render Tree chỉ chứa các node **hiển thị được**. Ví dụ: Các node có `display: none` sẽ bị loại khỏi Render Tree (nhưng `visibility: hidden` vẫn tồn tại vì nó chiếm không gian).
-
-4. **Layout (Reflow)**
-   - Trình duyệt tính toán kích thước (width, height) và vị trí chính xác (x, y) của từng node trong Render Tree dựa trên viewport.
-   - Quá trình này tốn rất nhiều tài nguyên (đặc biệt khi dùng percentage, flexbox, grid).
-
-5. **Paint (Repaint)**
-   - Chuyển các node trong Render Tree thành các pixel thực tế trên màn hình (vẽ text, màu sắc, border, shadow, image).
-   - Thường được vẽ trên nhiều layer khác nhau.
-
-6. **Compositing**
-   - Trình duyệt gộp các layer đã paint lại theo đúng thứ tự z-index để tạo thành hình ảnh cuối cùng hiển thị trên màn hình.
-
-> [!WARNING]
-> **JavaScript Execution** có thể block DOM construction, thay đổi DOM/CSSOM và ép trình duyệt phải thực hiện lại toàn bộ quá trình Layout và Paint.
+> A detailed explanation of how browsers transform raw HTML, CSS, and JavaScript into rendered pixels, covering the Critical Rendering Path, Reflow/Repaint mechanics, and GPU hardware acceleration. Mastering this pipeline is essential for optimizing Web Performance.
 
 ---
 
-## Reflow và Repaint (Tránh "Layout Thrashing")
+## 1. What is it? (What)
 
-### Reflow (Layout thrashing)
-Xảy ra khi bạn thay đổi các thuộc tính ảnh hưởng đến **geometry** của phần tử (width, height, margin, padding, top, left, font-size).
-- Khi một element bị reflow, tất cả các con của nó, các phần tử xung quanh, và thậm chí toàn bộ document có thể phải tính toán lại Layout.
-- **Bad Practice:** Đọc (`offsetWidth`, `clientHeight`) và Ghi (`style.width`) liên tục trong một vòng lặp sẽ ép trình duyệt phải reflow liên tục đồng bộ (Synchronous Layout).
+The **Browser Rendering Pipeline** (also called the Critical Rendering Path) is the sequence of steps a browser executes to convert HTML, CSS, and JavaScript source code into a visual display on screen.
 
-### Repaint
-Xảy ra khi thay đổi các thuộc tính về **visual** không ảnh hưởng geometry (color, background, box-shadow, visibility).
-- Repaint nhẹ hơn Reflow nhưng vẫn tốn GPU/CPU.
+### Classification
+- **Type**: Browser subsystem / rendering engine.
+- **Key implementations**: Blink (Chrome), Gecko (Firefox), WebKit (Safari).
+
+### Pipeline Stages
+
+```mermaid
+graph LR
+    HTML["HTML Bytes"] --> DOM["DOM Tree"]
+    CSS["CSS Bytes"] --> CSSOM["CSSOM Tree"]
+    DOM --> RT["Render Tree"]
+    CSSOM --> RT
+    RT --> Layout["Layout<br/>(Reflow)"]
+    Layout --> Paint["Paint<br/>(Repaint)"]
+    Paint --> Composite["Compositing"]
+    Composite --> Screen["Pixels on Screen"]
+```
 
 ---
 
-## GPU Hardware Acceleration & Composite Layers
+## 2. Why does it exist? (Why)
 
-Để tối ưu animation mượt mà (đạt 60fps), nguyên tắc vàng là **chỉ animate trên thuộc tính kích hoạt Compositing** (bỏ qua Layout và Paint).
+Browsers must translate declarative markup (HTML/CSS) into a pixel-perfect visual representation. This pipeline exists because:
 
-Chỉ có 2 thuộc tính thỏa mãn điều kiện này:
+- **HTML and CSS are separate languages** that must be merged into a unified structure (Render Tree) before any visual output is possible.
+- **Layout is computationally expensive** — the browser must calculate the exact position and size of every element relative to the viewport and its siblings.
+- **Compositing enables hardware acceleration** — by separating content into GPU-managed layers, the browser can animate and scroll content without re-executing the entire pipeline.
+
+Before modern compositing, any visual change required a full relayout and repaint, causing severe jank in animations and scrolling.
+
+---
+
+## 3. Without vs. With Comparison (Compare)
+
+### Without understanding the rendering pipeline
+
+```javascript
+// Layout thrashing: alternating reads and writes forces synchronous reflow
+const elements = document.querySelectorAll(".item");
+elements.forEach((el) => {
+  const height = el.offsetHeight; // READ — triggers layout calculation
+  el.style.height = height * 2 + "px"; // WRITE — invalidates layout
+  // Next iteration's READ forces another synchronous layout
+});
+```
+
+### With understanding the rendering pipeline
+
+```javascript
+// Batch reads, then batch writes — avoids layout thrashing
+const elements = document.querySelectorAll(".item");
+const heights = Array.from(elements).map((el) => el.offsetHeight); // All READs
+
+requestAnimationFrame(() => {
+  elements.forEach((el, i) => {
+    el.style.height = heights[i] * 2 + "px"; // All WRITEs batched
+  });
+});
+```
+
+| Aspect | Without knowledge | With knowledge |
+|---|---|---|
+| DOM read/write pattern | Interleaved (layout thrashing) | Batched (single reflow) |
+| Animation properties | `top`, `left`, `width` (trigger reflow) | `transform`, `opacity` (compositor only) |
+| Script loading | Synchronous `<script>` blocking parse | `defer` / `async` attributes |
+| Performance | Janky, dropped frames | Smooth 60fps |
+
+---
+
+## 4. Common Use Cases
+
+1. **Animation optimization** — Using `transform` and `opacity` exclusively to keep animations on the compositor thread.
+2. **Diagnosing layout jank** — Using Chrome DevTools Performance tab to identify forced synchronous layouts.
+3. **Critical CSS extraction** — Inlining above-the-fold CSS to unblock rendering.
+4. **Script loading strategy** — Choosing between `async`, `defer`, and dynamic `import()` based on dependency requirements.
+5. **Image and font loading** — Preventing Cumulative Layout Shift (CLS) by reserving dimensions and using `font-display` strategies.
+
+### When deep pipeline knowledge is less critical
+
+- Server-rendered static content sites with minimal interactivity.
+- Internal tools where performance tolerances are high.
+
+---
+
+## 5. Deep Practice
+
+### Reflow vs. Repaint
+
+**Reflow (Layout)**: Triggered when changes affect element geometry (width, height, margin, padding, font-size, position). A reflow on one element can cascade to ancestors, siblings, and descendants.
+
+**Repaint**: Triggered when changes affect visual properties that do not alter geometry (color, background, box-shadow, visibility). Cheaper than reflow but still consumes GPU/CPU resources.
+
+### GPU Hardware Acceleration and Composite Layers
+
+The golden rule for smooth animations (60fps) is to **only animate properties that trigger compositing**, bypassing Layout and Paint entirely.
+
+Only two CSS properties qualify:
 1. `transform` (translate, scale, rotate)
 2. `opacity`
 
-Khi bạn dùng `transform` hoặc `opacity`, trình duyệt có thể đẩy element đó lên một **Layer riêng biệt (Composite Layer)** và giao cho **GPU** xử lý thay vì CPU, giúp animation cực kỳ mượt.
+When these properties change, the browser can promote the element to a dedicated **Composite Layer** handled by the GPU.
 
-### Tạo Composite Layer bằng `will-change`
 ```css
-/* Báo trước cho trình duyệt để nó tạo sẵn GPU Layer */
+/* Hint the browser to pre-create a GPU layer */
 .animated-element {
   will-change: transform, opacity;
 }
 ```
 
 > [!CAUTION]
-> Lạm dụng `will-change` hoặc `translateZ(0)` (hack GPU) sẽ tiêu tốn cực kỳ nhiều RAM/VRAM của user. Chỉ dùng cho những element thực sự cần animate liên tục.
+> Overusing `will-change` or the `translateZ(0)` GPU hack consumes significant VRAM. Only apply it to elements that genuinely require continuous animation.
 
-## Tóm tắt nguyên tắc tối ưu Render
-- Dùng `<script defer>` hoặc `<script async>`.
-- Minify và nén CSS/JS, tải critical CSS inline.
-- Hạn chế đọc/ghi DOM đan xen (dùng `requestAnimationFrame` để batch DOM updates).
-- Chỉ animate `transform` và `opacity`.
+### Best Practices
+
+1. **Use `<script defer>` or `<script async>`** to prevent JavaScript from blocking DOM construction.
+2. **Minify and compress CSS/JS**; inline critical CSS for above-the-fold content.
+3. **Never interleave DOM reads and writes** — batch them or use `requestAnimationFrame`.
+4. **Only animate `transform` and `opacity`** for jank-free animations.
+5. **Set explicit `width` and `height` on `<img>`, `<video>`, and `<iframe>`** to prevent layout shifts.
+
+### Common Pitfalls
+
+1. **Layout thrashing** — Alternating `offsetHeight` reads with `style.height` writes in a loop.
+2. **Animating `top`/`left`** — These trigger full reflow on every frame instead of using `transform: translate()`.
+3. **Unoptimized web fonts** — Missing `font-display` causes Flash of Invisible Text (FOIT).
+4. **Synchronous `<script>` in `<head>`** — Blocks both DOM parsing and rendering.
+5. **Excessive `will-change`** — Promoting too many elements to GPU layers exhausts VRAM.
+
+### Production Checklist
+
+- [ ] No synchronous render-blocking scripts in `<head>`.
+- [ ] Critical CSS inlined; non-critical CSS loaded asynchronously.
+- [ ] All animations use `transform`/`opacity` only.
+- [ ] No layout thrashing detected in Chrome DevTools Performance tab.
+- [ ] All media elements (`<img>`, `<video>`) have explicit dimensions.
+- [ ] `will-change` applied only to actively animated elements.
+
+---
+
+## 6. Code Templates and Integration
+
+### Performance-Safe Animation Utility
+
+```typescript
+/**
+ * Animates an element using only compositor-friendly properties.
+ * Uses the Web Animations API for optimal performance.
+ */
+export function animateSlideIn(element: HTMLElement, durationMs = 300): Animation {
+  return element.animate(
+    [
+      { transform: "translateY(20px)", opacity: 0 },
+      { transform: "translateY(0)", opacity: 1 },
+    ],
+    {
+      duration: durationMs,
+      easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+      fill: "forwards",
+    }
+  );
+}
+```
+
+### Batched DOM Mutation Helper
+
+```typescript
+/**
+ * Batches DOM reads and writes to avoid layout thrashing.
+ * Reads execute immediately; writes are deferred to the next animation frame.
+ */
+export function batchDomUpdate(
+  readFn: () => void,
+  writeFn: () => void
+): void {
+  readFn();
+  requestAnimationFrame(writeFn);
+}
+```
+
+---
+
+## Related Topics
+
+- [JS Engine Internals](./js-engine-internals.md) — How V8 executes the JavaScript that drives rendering.
+- [Web Performance & Core Web Vitals](./web-performance-vitals.md) — Measuring real-user rendering performance with LCP, INP, and CLS.
+- [CSS Architecture & Performance](../04-styling/css-architecture-performance.md) — How styling choices impact the rendering pipeline.

