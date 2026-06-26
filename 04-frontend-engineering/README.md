@@ -2,6 +2,14 @@
 
 > A comprehensive learning path for **Frontend Engineers**, progressing from core web platform knowledge through React mastery to production-grade deployment strategies.
 
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Lộ trình học tập toàn diện dành cho Kỹ sư Frontend, phát triển từ kiến thức nền tảng về web, làm chủ React, cho đến các chiến lược triển khai (deployment) đạt chuẩn production.
+
+</details>
+
 ---
 
 ## Roadmap
