@@ -1,10 +1,51 @@
 # App Router and React Server Components
 
-> A comprehensive guide to Next.js App Router architecture and React Server Components (RSC), covering the Server/Client component model, the Network Boundary, serialization rules, composition patterns, and Server Actions. This represents the most significant architectural shift in React since hooks.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Hướng dẫn toàn diện về kiến trúc App Router của Next.js và React Server Components (RSC), bao gồm mô hình Server/Client component, Ranh giới Mạng (Network Boundary), quy tắc tuần tự hóa (serialization), các mẫu composition và Server Actions. Đây là bước chuyển mình về kiến trúc lớn nhất của React kể từ khi ra mắt hooks.
+
+</details>
+
+> **Summary**: A comprehensive guide to Next.js App Router architecture and React Server Components (RSC), covering the Server/Client component model, the Network Boundary, serialization rules, composition patterns, and Server Actions. This represents the most significant architectural shift in React since hooks.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn đang lắp ráp một chiếc ô tô:
+- **Client Components (Mô hình cũ)**: Bạn gửi toàn bộ nhà máy, công nhân, linh kiện đến tận nhà khách hàng và lắp ráp ô tô ngay trong sân nhà họ. Rất nặng nề và mất thời gian (Gửi quá nhiều JavaScript xuống trình duyệt).
+- **Server Components (Mô hình mới)**: Bạn lắp ráp xong khung xe, động cơ, bánh xe ngay tại nhà máy (Server), và chỉ gửi chiếc xe đã hoàn thiện đến nhà khách hàng (HTML tinh gọn).
+Nhưng chiếc xe cần vô lăng và radio để khách hàng tương tác? Bạn gắn nhãn `"use client"` cho cái vô lăng. Vô lăng là thứ duy nhất được "lắp ráp" và chạy tại nhà khách hàng. Nhờ vậy, khách hàng nhận xe siêu nhanh mà vẫn lái được.
+
+</details>
+
+Imagine you are building a car:
+- **Client Components (Old Model)**: You ship the entire factory, workers, and loose parts to the customer's driveway and build the car there. It's incredibly heavy and slow (sending too much JavaScript to the browser).
+- **Server Components (New Model)**: You assemble the chassis, engine, and wheels at the factory (the Server). You ship the finished, pre-assembled car to the customer (pure HTML).
+But the car needs a steering wheel and a radio for the customer to interact with? You attach a `"use client"` sticker to the steering wheel. The steering wheel is the only thing "assembled" and running at the customer's house. The customer gets the car instantly and can still drive it.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**React Server Components (RSC)** là một loại Component mới chỉ chạy trên Server (Node.js). Kết hợp với **Next.js App Router**, chúng tạo ra một mô hình mặc định: Mọi component đều render ở server để gửi HTML thuần xuống trình duyệt, trừ khi bạn khai báo `"use client"` để biến nó thành component tương tác trên trình duyệt (Client Component).
+
+**Phân loại:**
+- **Loại**: Kiến trúc render Full-stack.
+- **Framework**: Next.js 13+ (App Router).
+- **Thay thế**: Pages Router cũ (`getServerSideProps`, v.v...).
+
+</details>
 
 **React Server Components (RSC)** are a new component type that renders exclusively on the server (Node.js or Edge runtime). Combined with the **Next.js App Router** (introduced in Next.js 13), they establish a default-server rendering model where components are Server Components unless explicitly opted into client-side interactivity with `"use client"`.
 
@@ -26,7 +67,20 @@
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Mô hình React truyền thống gửi toàn bộ code JavaScript xuống trình duyệt, kể cả những phần giao diện tĩnh không bao giờ thay đổi. Việc này gây ra:
+- File JS quá nặng, tải chậm.
+- Hiện tượng "thác nước" (waterfall): Màn hình tải xong -> Chạy JS -> JS gọi API -> Đợi API trả về -> Mới hiện dữ liệu.
+- Phải tạo hàng tá API Routes rác chỉ để Frontend có chỗ gọi vào.
+
+App Router và RSC giải quyết triệt để: Server tự gọi Database, tự render ra HTML tĩnh, và không gửi giọt JS nào xuống trình duyệt.
+
+</details>
 
 The traditional React model sends the entire component tree as JavaScript to the browser, even for components that never need interactivity. This creates:
 
@@ -40,7 +94,16 @@ The traditional React model sends the entire component tree as JavaScript to the
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Không có RSC (Pages Router): File `Dashboard` phải gọi cục dữ liệu khổng lồ ở trên cùng (`getServerSideProps`), sau đó truyền từ từ qua 10 component con (Prop Drilling).
+Có RSC (App Router): Mỗi component con TỰ GỌI dữ liệu của riêng nó ngay trên Server. Cực kỳ dễ bảo trì và mở rộng.
+
+</details>
 
 ### Without RSC (Pages Router)
 
@@ -100,7 +163,22 @@ export default async function StatsPanel() {
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Trang Blog, Tài liệu, Landing Page**: 100% Server Components, siêu nhanh, không có JS thừa.
+2. **Dashboard**: Khung viền và Data bằng Server Component. Chart/Biểu đồ bằng Client Component.
+3. **Form đăng nhập / Gửi dữ liệu**: Dùng Server Actions, bảo mật tuyệt đối, bỏ qua bước tạo API Route.
+
+**Chỉ dùng Client Component (`"use client"`) khi:**
+- Cần xài `useState`, `useEffect`.
+- Cần thao tác DOM, click, hover (Button, Modal, Tooltip).
+- Xài thư viện ngoài chưa hỗ trợ RSC.
+
+</details>
 
 1. **Content-heavy pages** — Blog posts, documentation, marketing pages — 100% Server Components with zero client JS.
 2. **Dashboard layouts** — Server Components for data fetching; Client Components only for interactive charts and filters.
@@ -116,7 +194,19 @@ export default async function StatsPanel() {
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Ranh giới Mạng (Network Boundary)**: 
+Từ Server Component truyền prop xuống Client Component giống như gửi gói hàng qua bưu điện. Bạn KHÔNG THỂ gửi một hàm (Function) qua bưu điện, bạn chỉ có thể gửi chữ, số, Object, Array, hoặc HTML (JSX).
+
+**Thủ thuật nhúng Server vào Client**:
+Đừng import trực tiếp Server Component vào bên trong Client Component (nó sẽ biến thành Client). Hãy truyền thông qua prop `children`.
+
+</details>
 
 ### The Network Boundary
 
@@ -237,7 +327,15 @@ function SubmitButton() {
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Đoạn code dưới trình bày cách kết hợp Server Component và `<Suspense>`. Profile tải cực nhanh, còn Activity tải chậm hơn nên được gói vào Suspense để hiển thị bộ khung Skeleton tạm thời, giúp người dùng không phải chờ đợi.
+
+</details>
 
 ### Server Component Data Fetching Template
 
