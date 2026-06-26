@@ -1,10 +1,55 @@
 # Web Performance and Core Web Vitals
 
-> A comprehensive guide to modern web performance optimization centered on Google's **Core Web Vitals (CWV)**, covering LCP, INP, and CLS measurement, optimization strategies, Resource Hints, and caching architectures. CWV directly impacts SEO rankings and user conversion rates.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Hướng dẫn toàn diện về đo lường, chẩn đoán và tối ưu hóa hiệu năng web. Tập trung mạnh vào Core Web Vitals của Google (LCP, CLS, INP), những chỉ số ảnh hưởng trực tiếp đến SEO và trải nghiệm người dùng.
+
+</details>
+
+> **Summary**: A comprehensive guide to measuring, diagnosing, and optimizing web performance. Focuses heavily on Google's Core Web Vitals (LCP, CLS, INP) which directly impact SEO and user experience.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn vào một nhà hàng:
+- **LCP (Tốc độ)**: Cần bao lâu để món chính (đĩa bít tết to nhất) được bưng ra bàn? Nếu quá 2.5 giây, bạn sẽ bực mình.
+- **CLS (Sự ổn định)**: Bạn định với tay lấy ly nước, đột nhiên bồi bàn đặt đĩa salad vào giữa làm bạn chộp trượt và đánh đổ ly nước. Trang web cũng vậy, nếu chữ và nút bấm cứ nhảy lung tung khi đang tải, người dùng sẽ bấm nhầm.
+- **INP (Phản hồi)**: Bạn gọi bồi bàn "Anh ơi!", nếu anh ta quay lại dạ ngay lập tức thì tốt. Nếu anh ta bận làm việc khác, 3 giây sau mới quay lại, bạn sẽ thấy phục vụ quá tệ.
+
+Core Web Vitals chính là "Điểm đánh giá chất lượng phục vụ" của trang web bạn.
+
+</details>
+
+Imagine you go to a restaurant:
+- **LCP (Speed)**: How long does it take for the main dish (the biggest steak) to be placed on your table? If it takes too long (>2.5s), you get annoyed.
+- **CLS (Stability)**: You reach out to grab your glass of water, but a waiter suddenly slides a salad plate in the middle, causing you to knock the water over. Websites do this too: if text and buttons jump around while loading, users will click the wrong thing.
+- **INP (Responsiveness)**: You call out "Excuse me!" to a waiter. If they immediately respond, great. If they are busy and ignore you for 3 seconds before responding, you feel the service is terrible.
+
+Core Web Vitals are essentially the "Customer Service Rating" for your website.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Core Web Vitals** là một bộ 3 chỉ số hiệu năng lấy người dùng làm trung tâm do Google định nghĩa, dùng để đo lường tốc độ tải trang, khả năng tương tác, và sự ổn định thị giác của trang web trong thế giới thực.
+
+**Phân loại:**
+- **Loại**: Chỉ số đo lường hiệu năng.
+- **Tác giả**: Đội ngũ Google Chrome.
+- **Tác động**: Ảnh hưởng trực tiếp đến thứ hạng tìm kiếm trên Google (SEO).
+
+</details>
 
 **Core Web Vitals** are a set of three user-centric performance metrics defined by Google that measure real-world loading speed, interactivity, and visual stability of web pages.
 
@@ -21,7 +66,20 @@
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Các chỉ số cũ như "Thời gian tải trang" (Page Load Time) không phản ánh đúng **cảm nhận của người dùng**. Trang web có thể báo tải xong trong 500ms, nhưng ảnh chính lại mất tới 4 giây mới hiện ra.
+
+Core Web Vitals ra đời nhằm:
+- **Chuẩn hóa đo lường** theo cảm nhận thực tế của người dùng.
+- **Gắn liền với SEO** — Ép các lập trình viên phải thực sự tối ưu trang web nếu muốn lên top Google.
+- **Loại bỏ các chỉ số ảo**: Tháng 3/2024, INP đã thay thế FID vì FID chỉ đo độ trễ của lần bấm *đầu tiên*, bỏ qua các lần bấm bị lag sau đó.
+
+</details>
 
 Traditional performance metrics like page load time and DOMContentLoaded do not accurately reflect **user-perceived performance**. A page can fire `DOMContentLoaded` in 500ms while the hero image takes 4 seconds to appear.
 
@@ -35,7 +93,16 @@ INP replaced FID (First Input Delay) in March 2024 because FID only measured the
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Nếu không tối ưu: Ảnh chính bị tải chậm (LCP kém), ảnh không có kích thước làm vỡ bố cục (CLS kém), và script nặng chặn luồng xử lý chính làm trang web bị đơ (INP kém).
+Khi tối ưu: Báo trình duyệt tải ảnh chính trước (preload), khai báo sẵn kích thước ảnh, và chạy script ngầm.
+
+</details>
 
 ### Without CWV optimization
 
@@ -73,7 +140,21 @@ INP replaced FID (First Input Delay) in March 2024 because FID only measured the
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Trang sản phẩm E-commerce**: Tối ưu LCP cho ảnh sản phẩm ảnh hưởng trực tiếp tới tỉ lệ mua hàng.
+2. **Trang báo chí (News)**: Tối ưu CLS để quảng cáo không đẩy chữ đi nơi khác khi người dùng đang đọc.
+3. **Dashboard phần mềm**: Tối ưu INP khi lọc/tìm kiếm dữ liệu để giao diện không bị treo.
+4. **Landing Page**: Rất quan trọng cho SEO và giảm tỉ lệ thoát (bounce rate).
+
+**Khi nào ít quan trọng hơn**:
+- Các tool nội bộ của công ty (không cần SEO).
+
+</details>
 
 1. **E-commerce product pages** — LCP optimization for hero images directly correlates with conversion rate.
 2. **News and content sites** — CLS prevention for ad-heavy layouts with dynamic content injection.
@@ -88,7 +169,22 @@ INP replaced FID (First Input Delay) in March 2024 because FID only measured the
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Tối ưu LCP**: 
+Không bao giờ dùng `loading="lazy"` cho ảnh ở phần đầu màn hình. Dùng `fetchpriority="high"` cho ảnh quan trọng nhất.
+
+**Tối ưu INP**:
+Chia nhỏ các tác vụ quá dài (Long Tasks > 50ms) để trình duyệt có thể chen vào xử lý click của người dùng. Tránh re-render không cần thiết trong React.
+
+**Tối ưu CLS**:
+Luôn khai báo `width` và `height` cho ảnh. Dùng `font-display: swap` để tránh giật font chữ. KHÔNG chèn nội dung lên trên nội dung đã render.
+
+</details>
 
 ### LCP Optimization
 
@@ -165,7 +261,15 @@ INP replaced FID (First Input Delay) in March 2024 because FID only measured the
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Đoạn code sử dụng thư viện `web-vitals` để liên tục đo lường và gửi thông số LCP, CLS, INP thực tế của người dùng về server (sử dụng `sendBeacon` để đảm bảo gửi thành công kể cả khi người dùng đang tắt tab).
+
+</details>
 
 ### Core Web Vitals Monitoring with `web-vitals`
 

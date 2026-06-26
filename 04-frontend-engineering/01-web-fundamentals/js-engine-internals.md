@@ -1,10 +1,52 @@
 # JavaScript Engine Internals
 
-> A deep dive into how JavaScript executes under the hood, covering V8 architecture, JIT compilation, the Event Loop, and Garbage Collection. Understanding these internals is essential for writing high-performance frontend code and diagnosing subtle runtime bugs.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Đi sâu vào cách JavaScript thực thi bên dưới (under the hood), bao gồm kiến trúc V8, biên dịch JIT, Event Loop và Garbage Collection (Dọn rác). Việc hiểu rõ các thành phần bên trong này là rất quan trọng để viết code frontend hiệu năng cao và chẩn đoán các lỗi runtime phức tạp.
+
+</details>
+
+> **Summary**: A deep dive into how JavaScript executes under the hood, covering V8 architecture, JIT compilation, the Event Loop, and Garbage Collection. Understanding these internals is essential for writing high-performance frontend code and diagnosing subtle runtime bugs.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn đang nhờ một đầu bếp (JS Engine) nấu ăn theo công thức tiếng Anh (code JS):
+- **Interpreter (Người dịch trực tiếp)**: Bếp trưởng đọc từng dòng tiếng Anh, dịch ra tiếng Việt rồi nấu. Nấu nhanh ngay lập tức, nhưng nếu món đó phải nấu 100 lần, ông ấy vẫn phải dịch lại 100 lần (Rất chậm).
+- **Compiler (Người biên dịch trước)**: Bếp trưởng dành 1 tiếng đồng hồ dịch toàn bộ quyển sách sang tiếng Việt rồi mới nấu. Nấu 100 lần rất nhanh, nhưng phải đợi 1 tiếng lúc đầu mới được ăn (Chậm lúc khởi động).
+- **JIT (Just-In-Time) Compiler của V8**: Kết hợp cả 2! Bếp trưởng đọc từng dòng và nấu ngay lập tức để bạn có đồ ăn nhanh nhất. Nhưng nếu thấy món "Trứng ốp la" bị gọi tới 100 lần (Hot function), ông ấy lập tức viết hẳn một tờ giấy nhớ "Cách làm Trứng ốp la siêu tốc" dán lên tường (Machine Code). Lần 101, ông ấy làm trong chớp mắt mà không cần dịch nữa.
+
+</details>
+
+Imagine you ask a chef (JS Engine) to cook a meal from a recipe written in a foreign language (JS code):
+- **Interpreter**: The chef translates line 1, cooks it, then translates line 2, cooks it. It's fast to start, but if they cook the same dish 100 times, they have to translate it 100 times.
+- **Compiler**: The chef spends an hour translating the entire book before cooking anything. Cooking is super fast, but you have to wait an hour just to get your first bite.
+- **V8's JIT Compiler**: The best of both! The chef translates line-by-line and cooks immediately so you eat fast. But if they notice they are cooking "Fried Eggs" 100 times (a "Hot" function), they secretly write down a super-optimized "Fried Egg Cheat Sheet" (Machine Code) and tape it to the wall. The 101st time, they cook it instantly without translating.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**JavaScript Engine** là một chương trình dùng để đọc và thực thi mã JavaScript. Engine phổ biến nhất là **V8** của Google (dùng trong Chrome, Node.js và Deno).
+
+Các Engine hiện đại không chỉ dịch (interpret) từng dòng. Chúng sử dụng **Biên dịch JIT (Just-In-Time)**: một sự kết hợp giữa việc dịch trực tiếp (để khởi động nhanh) và biên dịch mã máy (để chạy tốc độ cao nhất).
+
+**Luồng chạy của V8**:
+- **Ignition (Interpreter)**: Dịch mã thành Bytecode và chạy ngay lập tức. Đồng thời thu thập dữ liệu (Profiling).
+- **TurboFan (Compiler)**: Lấy dữ liệu từ Ignition, tìm ra các hàm chạy nhiều lần (hot) và biến chúng thành Mã Máy (Machine Code) siêu nhanh. Nếu dữ liệu thay đổi, nó sẽ "hủy tối ưu" (Deoptimize) và quay lại dùng Bytecode.
+
+</details>
 
 A **JavaScript Engine** is a program that interprets and executes JavaScript source code. The most widely used engine is Google's **V8**, which powers Chrome, Node.js, and Deno.
 
@@ -40,7 +82,17 @@ graph LR
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Ban đầu, JavaScript chỉ là ngôn ngữ thông dịch thuần túy (rất chậm). Khi các trang web ngày càng phức tạp (từ những form đơn giản biến thành các ứng dụng SPA khổng lồ), tốc độ này không còn đáp ứng được.
+
+**Biên dịch JIT** ra đời để thu hẹp khoảng cách giữa sự linh hoạt của ngôn ngữ thông dịch và sức mạnh của ngôn ngữ biên dịch (như C, Java). Kiến trúc V8 giải quyết bài toán hóc búa: vừa phải khởi động ứng dụng cực nhanh, vừa phải chạy mượt mà khi xử lý logic nặng.
+
+</details>
 
 JavaScript was originally a purely interpreted language, leading to poor execution speed for complex applications. The problem became critical as web applications grew from simple form validators to full-scale desktop-replacement SPAs.
 
@@ -48,7 +100,15 @@ JavaScript was originally a purely interpreted language, leading to poor executi
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Nếu bạn không hiểu cách V8 tối ưu (TurboFan), bạn có thể vô tình viết hàm nhận vào quá nhiều kiểu dữ liệu khác nhau (Megamorphic). Việc này ép V8 phải hủy tối ưu (Deoptimize) và chạy rất chậm. Khi viết code đồng nhất kiểu dữ liệu (Monomorphic), V8 sẽ giữ nguyên Mã Máy và chạy tốc độ tối đa.
+
+</details>
 
 ### Without understanding engine internals
 
@@ -81,7 +141,19 @@ concatStrings("hello", "world");
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **SPA hiệu năng cao**: Bảng điều khiển (Dashboards), xử lý dữ liệu lớn (data grids).
+2. **Ứng dụng React lớn**: Tìm hiểu nguyên nhân gây giật lag khi render lại (reconciliation).
+3. **Săn lỗi Memory Leak (Rò rỉ bộ nhớ)**: Dùng tab Memory của Chrome DevTools để bắt các biến không bị xóa.
+4. **Node.js**: Tối ưu CPU, hiểu về Event Loop để tránh kẹt luồng xử lý (blocking).
+5. **Viết thư viện**: Viết code nương theo cách tối ưu của V8 thay vì đi ngược lại nó.
+
+</details>
 
 Understanding engine internals matters most in these scenarios:
 
@@ -98,7 +170,30 @@ Understanding engine internals matters most in these scenarios:
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Event Loop**:
+JS chạy trên 1 luồng duy nhất (Call Stack). Thứ tự chạy:
+1. Chạy sạch code đồng bộ trên Call Stack.
+2. Chạy sạch toàn bộ **Microtask Queue** (Promise, queueMicrotask).
+3. Chạy ĐÚNG MỘT **Macrotask** (setTimeout, I/O).
+4. Lặp lại.
+*Lưu ý*: Microtask có độ ưu tiên cao hơn. Nếu tạo vòng lặp vô tận bằng `Promise`, trình duyệt sẽ bị treo hoàn toàn!
+
+**Garbage Collection (Dọn rác)**:
+- **Young Generation (Thế hệ trẻ)**: Lưu các biến mới tạo, dọn rác cực nhanh và thường xuyên (Scavenger).
+- **Old Generation (Thế hệ già)**: Lưu các biến sống lâu. Dọn rác ít hơn nhưng tốn thời gian hơn (Mark-Sweep).
+
+**Lỗi Rò Rỉ Bộ Nhớ thường gặp**:
+- Quên xóa Event Listener khi tắt Component.
+- Quên `clearInterval()`.
+- Biến toàn cục (Global) vô tình.
+
+</details>
 
 ### The Event Loop
 
@@ -146,7 +241,15 @@ V8's heap is divided into two generational spaces:
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Dưới đây là một Hook React để phát hiện rò rỉ bộ nhớ (bằng cách đếm số lần render bất thường) và một Hook an toàn để tự động xóa Event Listener khi Component bị hủy, ngăn chặn rò rỉ bộ nhớ triệt để.
+
+</details>
 
 ### Detecting Memory Leaks in React
 

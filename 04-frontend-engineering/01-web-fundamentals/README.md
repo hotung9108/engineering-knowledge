@@ -2,6 +2,14 @@
 
 > Core web platform knowledge that every frontend engineer must master before diving into frameworks. Covers JavaScript engine internals, browser rendering mechanics, advanced TypeScript, and web performance optimization.
 
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Kiến thức cốt lõi về nền tảng web mà mọi kỹ sư frontend phải nắm vững trước khi đi sâu vào các framework. Bao gồm hoạt động bên trong của JavaScript engine, cơ chế render của trình duyệt, TypeScript nâng cao, và tối ưu hóa hiệu năng web.
+
+</details>
+
 ---
 
 ## Prerequisites

@@ -1,10 +1,60 @@
 # Browser Rendering Pipeline
 
-> A detailed explanation of how browsers transform raw HTML, CSS, and JavaScript into rendered pixels, covering the Critical Rendering Path, Reflow/Repaint mechanics, and GPU hardware acceleration. Mastering this pipeline is essential for optimizing Web Performance.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Cái nhìn chi tiết về Critical Rendering Path (CRP), cách trình duyệt biến HTML/CSS/JS thành các điểm ảnh trên màn hình, và cách tối ưu hóa để có animation mượt mà đạt 60fps bằng cách tránh Layout Thrashing.
+
+</details>
+
+> **Summary**: A detailed look at the Critical Rendering Path (CRP), how browsers turn HTML/CSS/JS into pixels on the screen, and how to optimize for smooth 60fps animations by avoiding Layout Thrashing.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn đang xây một ngôi nhà bằng Lego theo bản vẽ:
+1. **HTML**: Bạn nhận được hộp Lego và đổ hết ra sàn (DOM).
+2. **CSS**: Bạn nhận được bảng hướng dẫn sơn màu: "Cục vuông thì màu đỏ, cục dài thì màu xanh" (CSSOM).
+3. **Render Tree**: Bạn chọn ra những cục Lego thực sự cần dùng và gắn màu cho chúng.
+4. **Layout**: Bạn tính toán xem cục nào đặt ở đâu trên sàn nhà (Toán học).
+5. **Paint**: Bạn dùng cọ sơn màu lên từng cục Lego.
+6. **Compositing**: Bạn ghép các khối đã sơn thành một ngôi nhà hoàn chỉnh và trưng bày.
+
+Nếu bạn cứ liên tục vừa đo đạc (Layout) vừa sơn màu (Paint), bạn sẽ làm rất chậm. Đó là lý do trình duyệt bị giật lag!
+
+</details>
+
+Imagine you are building a Lego house from a blueprint:
+1. **HTML**: You receive the Lego box and dump the pieces on the floor (DOM).
+2. **CSS**: You receive the painting instructions: "Square blocks are red, long blocks are blue" (CSSOM).
+3. **Render Tree**: You pick out the pieces you actually need and apply the color rules to them.
+4. **Layout**: You calculate exactly where each piece goes on the floor (Math/Geometry).
+5. **Paint**: You take a brush and paint the pixels onto each piece.
+6. **Compositing**: You snap the painted chunks together to form the final house and display it.
+
+If you constantly switch between measuring (Layout) and painting (Paint) for every single brick, you will work very slowly. This is exactly why browsers stutter (jank) during bad animations!
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Browser Rendering Pipeline** (còn gọi là Critical Rendering Path) là chuỗi các bước mà một trình duyệt thực hiện để chuyển đổi mã nguồn HTML, CSS và JavaScript thành hình ảnh hiển thị trên màn hình.
+
+**Phân loại:**
+- **Loại**: Hệ thống con của trình duyệt / Rendering engine.
+- **Các lõi phổ biến**: Blink (Chrome), Gecko (Firefox), WebKit (Safari).
+
+</details>
 
 The **Browser Rendering Pipeline** (also called the Critical Rendering Path) is the sequence of steps a browser executes to convert HTML, CSS, and JavaScript source code into a visual display on screen.
 
@@ -28,7 +78,18 @@ graph LR
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Trình duyệt cần dịch các ngôn ngữ đánh dấu (HTML/CSS) thành hình ảnh hoàn hảo đến từng điểm ảnh. Quy trình này tồn tại vì:
+- **HTML và CSS là hai ngôn ngữ tách biệt**, cần được gộp lại thành một cấu trúc thống nhất (Render Tree).
+- **Tính toán Layout rất nặng nề**: Trình duyệt phải tính toán chính xác vị trí và kích thước của từng phần tử so với màn hình.
+- **Compositing giúp tận dụng card đồ họa (GPU)**: Bằng cách chia nội dung thành các lớp (layers) do GPU quản lý, trình duyệt có thể tạo animation và cuộn trang mà không cần chạy lại toàn bộ quy trình.
+
+</details>
 
 Browsers must translate declarative markup (HTML/CSS) into a pixel-perfect visual representation. This pipeline exists because:
 
@@ -40,7 +101,15 @@ Before modern compositing, any visual change required a full relayout and repain
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Nếu không hiểu quy trình này, lập trình viên thường viết code JavaScript liên tục đọc và ghi DOM đan xen nhau (Layout Thrashing). Điều này ép trình duyệt phải liên tục tính toán lại giao diện, gây giật lag. Khi hiểu quy trình, bạn sẽ gộp (batch) toàn bộ lệnh ĐỌC lên trước, và lệnh GHI ra sau.
+
+</details>
 
 ### Without understanding the rendering pipeline
 
@@ -77,7 +146,19 @@ requestAnimationFrame(() => {
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Tối ưu hóa Animation**: Chỉ sử dụng `transform` và `opacity` để GPU xử lý.
+2. **Chẩn đoán giật lag**: Dùng thẻ Performance trong Chrome DevTools để tìm ra các lỗi đồng bộ Layout.
+3. **Trích xuất Critical CSS**: Đưa CSS quan trọng lên đầu (inline) để không chặn quá trình hiển thị.
+4. **Chiến lược nạp Script**: Chọn đúng `async` hoặc `defer`.
+5. **Nạp ảnh và font chữ**: Tránh hiện tượng giật nội dung (CLS) bằng cách đặt trước kích thước ảnh.
+
+</details>
 
 1. **Animation optimization** — Using `transform` and `opacity` exclusively to keep animations on the compositor thread.
 2. **Diagnosing layout jank** — Using Chrome DevTools Performance tab to identify forced synchronous layouts.
@@ -92,7 +173,19 @@ requestAnimationFrame(() => {
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Reflow (Layout) vs. Repaint**:
+- **Reflow**: Xảy ra khi thay đổi kích thước/vị trí (width, height, top). Rất tốn tài nguyên.
+- **Repaint**: Xảy ra khi đổi màu sắc, bóng (color, box-shadow). Rẻ hơn Reflow nhưng vẫn tốn CPU.
+
+**GPU Hardware Acceleration**: Quy tắc vàng là chỉ dùng `transform` và `opacity` cho animation vì chúng bỏ qua cả Reflow và Repaint, đi thẳng vào GPU (Compositing).
+
+</details>
 
 ### Reflow vs. Repaint
 
@@ -147,7 +240,15 @@ When these properties change, the browser can promote the element to a dedicated
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Đoạn code dưới đây cung cấp một tiện ích tạo Animation mượt mà bằng JavaScript (Web Animations API) và một hàm giúp gộp lệnh ĐỌC và GHI DOM để tránh Layout Thrashing.
+
+</details>
 
 ### Performance-Safe Animation Utility
 

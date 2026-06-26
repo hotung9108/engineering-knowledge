@@ -1,10 +1,51 @@
 # Advanced TypeScript
 
-> A comprehensive guide to TypeScript's advanced type system features including Type Narrowing, Utility Types, Conditional Types with `infer`, constrained Generics, and Branded Types. These techniques are the foundation of type-safe frontend architecture at scale.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Hướng dẫn toàn diện về các tính năng kiểu hệ thống (type system) nâng cao của TypeScript, bao gồm Type Narrowing, Utility Types, Conditional Types với `infer`, Generics, và Branded Types. Đây là nền tảng để xây dựng kiến trúc frontend an toàn kiểu dữ liệu (type-safe) ở quy mô lớn.
+
+</details>
+
+> **Summary**: A comprehensive guide to TypeScript's advanced type system features including Type Narrowing, Utility Types, Conditional Types with `infer`, constrained Generics, and Branded Types. These techniques are the foundation of type-safe frontend architecture at scale.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn đang phân loại đồ chơi vào các hộp:
+- **JS cơ bản**: Bạn vứt tất cả đồ chơi (xe hơi, búp bê, khối xếp hình) vào một thùng lớn. Bất kỳ ai cũng có thể lấy ra bất kỳ thứ gì, rất dễ lấy nhầm.
+- **TS cơ bản**: Bạn dán nhãn "Hộp Xe Hơi", "Hộp Búp Bê". Mọi người phải lấy đúng đồ chơi.
+- **TS nâng cao**: Bạn không chỉ dán nhãn, mà còn chế tạo ra một cái máy tự động: "Nếu đồ chơi có bánh xe (Conditional Type), tự động bỏ vào hộp Xe Hơi; Nếu không, bỏ vào hộp Khác". Bạn tạo ra các luật lệ thông minh tự động thay đổi dựa trên đồ vật bạn có.
+
+</details>
+
+Imagine you are organizing toys into boxes:
+- **Basic JavaScript**: You throw all toys (cars, dolls, blocks) into a massive bin. Anyone can pull out anything; it's easy to grab the wrong toy.
+- **Basic TypeScript**: You label boxes "Car Box" and "Doll Box." People must put the correct toys in the correct boxes.
+- **Advanced TypeScript**: You don't just label boxes; you build an automated sorting machine. "If a toy has wheels (Conditional Type), automatically put it in the Car Box. Otherwise, put it in the Other Box." You create smart rules that automatically adapt based on what you put into them.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**TypeScript** là một tập hợp siêu dữ liệu (superset) tĩnh của JavaScript. Ở cấp độ nâng cao, hệ thống kiểu của TypeScript trở thành một ngôn ngữ lập trình siêu cấp (meta-programming language), có khả năng mã hóa các ràng buộc phức tạp của miền dữ liệu (domain constraints) trực tiếp vào trình kiểm tra kiểu (type checker).
+
+**Phân loại:**
+- **Loại**: Ngôn ngữ lập trình / Hệ thống kiểu tĩnh.
+- **Bản chất**: Tập hợp mở rộng của JavaScript.
+- **Thời điểm chạy**: Không có — các kiểu bị xóa sạch khi biên dịch (compile time).
+
+</details>
 
 **TypeScript** is a statically-typed superset of JavaScript that compiles to plain JavaScript. At the advanced level, TypeScript's type system becomes a powerful meta-programming language capable of encoding complex domain constraints directly into the type checker.
 
@@ -17,7 +58,19 @@ The advanced features covered here go beyond basic `interface` and `type` declar
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Tính linh hoạt của JavaScript sinh ra một loạt các lỗi chỉ xuất hiện khi chạy thực tế (runtime). Các tính năng kiểu nâng cao của TypeScript ra đời nhằm:
+- **Tiêu diệt hoàn toàn nhiều loại lỗi runtime** ngay từ lúc viết code.
+- **Mã hóa các luật nghiệp vụ** vào hệ thống (ví dụ: `UserId` không bao giờ được dùng lẫn lộn với `PostId`).
+- **Tự động hóa việc suy diễn kiểu dữ liệu** — thay vì phải sửa thủ công nhiều nơi, kiểu này có thể tự sinh ra từ kiểu khác.
+- **Giúp người viết thư viện** tạo ra các API tự viết tài liệu thông qua IntelliSense (gợi ý code).
+
+</details>
 
 JavaScript's dynamic typing introduces an entire category of bugs that only manifest at runtime: accessing properties on `undefined`, passing arguments in the wrong order, and mismatched API contracts between frontend and backend.
 
@@ -30,7 +83,15 @@ TypeScript's advanced type features exist to:
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Khi dùng chuỗi `string` thông thường cho mọi ID, TypeScript không thể phân biệt được `UserId` và `PostId`. Nhưng khi áp dụng **Branded Types**, bạn tạo ra các nhãn ảo (ảo vì chúng bị xóa khi chạy) để ép trình biên dịch phải báo lỗi nếu bạn vô tình truyền sai loại ID.
+
+</details>
 
 ### Without advanced TypeScript
 
@@ -72,7 +133,23 @@ fetchUser(userId); // Compiles
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Khớp kiểu dữ liệu API**: Suy diễn kiểu dữ liệu Frontend tự động từ các Schema Backend.
+2. **Mô hình máy trạng thái (State machine)**: Sử dụng Discriminated Unions để mô phỏng trạng thái (idle, loading, success, error).
+3. **Props trong Design System**: Ràng buộc các tham số của Component linh hoạt (Polymorphic).
+4. **Validation Form**: Map các kiểu form tự động với Mapped Types.
+5. **Domain-Driven Design (DDD)**: Sử dụng Branded Types để tránh nhầm lẫn giữa các ID.
+
+**Anti-patterns (Khi nào KHÔNG nên dùng)**:
+- Các script tạm thời (Throwaway scripts).
+- Lạm dụng việc trừu tượng hóa (Over-abstraction) làm code không thể đọc được.
+
+</details>
 
 1. **API response typing** — Deriving frontend types from backend schemas using Utility Types and `infer`.
 2. **State machine modeling** — Using Discriminated Unions to model finite states (idle, loading, success, error).
@@ -88,7 +165,19 @@ fetchUser(userId); // Compiles
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Thực tiễn cốt lõi:**
+1. Ưu tiên **Discriminated Unions** thay vì ép kiểu thủ công (`as`).
+2. Dùng toán tử `satisfies` để kiểm tra kiểu mà không làm mất đi giá trị gốc.
+3. Tránh dùng `any`; hãy dùng `unknown` vì nó bắt buộc bạn phải kiểm tra kiểu trước khi sử dụng.
+4. KHÔNG lạm dụng các Types phức tạp trong code ứng dụng kinh doanh, hãy để chúng nằm gọn trong các thư viện tiện ích (utilities).
+
+</details>
 
 ### Type Narrowing and Discriminated Unions
 
@@ -189,7 +278,15 @@ const name = getProperty(user, "name"); // type: string
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Mẫu code dưới đây trình bày cách dùng Discriminated Union cho một API Response an toàn. Khi `success: true`, bạn chắc chắn lấy được `data`. Khi `success: false`, bạn chắc chắn lấy được `error`.
+
+</details>
 
 ### Generic API Response Type
 
@@ -218,7 +315,15 @@ async function apiFetch<T>(url: string): Promise<ApiResponse<T>> {
 
 ---
 
-## 7. Cheatsheet
+## Layer 7: Cheatsheet
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Bảng tóm tắt các tính năng nâng cao và cú pháp thường dùng nhất của TypeScript.
+
+</details>
 
 | Feature | Syntax | Purpose |
 |---|---|---|
