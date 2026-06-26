@@ -1,10 +1,50 @@
 # API Layer Design
 
-> A comprehensive guide to designing a production-grade API layer in frontend applications, covering Axios Interceptor architecture with automatic token refresh, OpenAPI code generation, and the separation of Transport (Axios) and Caching (React Query) layers.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Hướng dẫn toàn diện về cách thiết kế tầng API cấp production trong các ứng dụng frontend, bao gồm kiến trúc Axios Interceptor với tính năng tự động làm mới token, sinh code tự động từ OpenAPI, và việc tách biệt giữa tầng Giao tiếp (Axios) và tầng Bộ nhớ đệm (React Query).
+
+</details>
+
+> **Summary**: A comprehensive guide to designing a production-grade API layer in frontend applications, covering Axios Interceptor architecture with automatic token refresh, OpenAPI code generation, and the separation of Transport (Axios) and Caching (React Query) layers.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn là Giám đốc công ty và cần gửi thư cho các đối tác:
+- **Không có API Layer**: Bạn tự tay viết thư, tự dán tem, tự đạp xe ra bưu điện gửi, và tự ngồi chờ xem thư có bị trả lại không. Quá mệt mỏi!
+- **Có API Layer**: Bạn thuê một cô Thư ký (Axios). Bạn chỉ việc nói "Gửi thư này cho ông A". Thư ký sẽ tự động dán tem bản quyền (Access Token), tự đạp xe đi gửi. Nếu tem hết hạn, thư ký tự xin tem mới (Token Refresh) rồi gửi lại mà không cần hỏi bạn. Hơn nữa, thư ký còn cất sẵn các lá thư cũ vào tủ (React Query) để khi bạn hỏi lại, cô ấy lấy ra ngay lập tức.
+
+</details>
+
+Imagine you are the CEO of a company and need to send letters to partners:
+- **Without an API Layer**: You write the letter yourself, lick the stamp yourself, ride your bike to the post office yourself, and wait to see if the letter gets returned. Exhausting!
+- **With an API Layer**: You hire a Secretary (Axios). You just say, "Send this to Mr. A." The secretary automatically attaches the company seal (Access Token) and mails it. If the seal is expired, the secretary gets a new one (Token Refresh) and resends the letter without bothering you. Even better, she keeps copies of old letters in a cabinet (React Query) so if you ask for it again, she hands it to you instantly.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Tầng API (API Layer)** là lớp phần mềm nằm giữa giao diện React và Server Backend. Nhiệm vụ của nó là xử lý mọi thứ liên quan đến giao tiếp mạng HTTP: xác thực người dùng, xử lý lỗi, lưu bộ nhớ đệm (cache), và gộp các yêu cầu trùng lặp lại với nhau.
+
+**Phân loại:**
+- **Loại**: Mẫu kiến trúc Frontend.
+- **Tầng giao tiếp (Transport)**: Axios hoặc `fetch` gốc.
+- **Tầng bộ nhớ đệm (Caching)**: React Query (TanStack Query) hoặc SWR.
+- **Tự động sinh code**: Orval / OpenAPI TypeScript Codegen.
+
+</details>
 
 The **API Layer** is the abstraction that sits between React components and backend services, handling HTTP communication, authentication, error normalization, caching, and request deduplication.
 
@@ -26,7 +66,21 @@ graph LR
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Nếu không có Tầng API chuẩn mực, mỗi Component tự gọi API theo cách riêng của nó. Điều này tạo ra một mớ bòng bong mã nguồn lặp lại và dễ lỗi.
+
+Tầng API giải quyết:
+- **Gắn Token (chứng minh danh tính)**: Interceptor tự động gắn `Authorization` vào mọi yêu cầu.
+- **Token hết hạn**: Interceptor tự động tạm dừng mọi yêu cầu, đi xin Token mới, rồi chạy tiếp.
+- **Kiểu dữ liệu (TypeScript)**: Tự sinh mã từ tài liệu Swagger/OpenAPI của Backend, không phải viết tay.
+- **Quản lý trạng thái (Loading/Error)**: React Query tự động theo dõi và cung cấp biến `isLoading`, `error` cho bạn vẽ UI.
+
+</details>
 
 Without a structured API layer, each component independently handles fetching, error handling, authentication, and retry logic — leading to massive duplication and inconsistent behavior.
 
@@ -40,7 +94,16 @@ Without a structured API layer, each component independently handles fetching, e
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Không có API Layer: Tự viết hàm `fetch`, tự lấy token từ `localStorage`, tự bắt lỗi 401. Viết đi viết lại 100 lần ở 100 component khác nhau.
+Có API Layer: Dùng React Query. Mọi logic lấy token, làm mới token, hay parse JSON đều được làm ẩn ở lớp dưới (Axios Interceptors).
+
+</details>
 
 ### Without API layer
 
@@ -79,7 +142,19 @@ const { data: user, isLoading, error } = useQuery({
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Web cần đăng nhập (SPA)**: Luôn cần cơ chế tự động gia hạn phiên đăng nhập (Token Refresh).
+2. **Hệ thống gọi nhiều API backend**: Tạo ra các đối tượng Axios (Instances) khác nhau cho từng Backend (ví dụ Backend thanh toán riêng, Backend tin tức riêng).
+3. **Phát triển dựa trên OpenAPI (Swagger)**: Đợi Backend viết tài liệu, Frontend chạy lệnh sinh ra toàn bộ code gọi API.
+4. **Cập nhật tức thì (Optimistic updates)**: Bấm like hiện xanh luôn, ngầm gọi API sau (Dùng React Query `onMutate`).
+5. **App chạy offline**: React Query tự động lưu dữ liệu xuống máy để xài khi rớt mạng.
+
+</details>
 
 1. **Authenticated SPAs** — Automatic token injection and refresh on 401 responses.
 2. **Multi-API backends** — Separate Axios instances with different base URLs and interceptors.
@@ -89,7 +164,22 @@ const { data: user, isLoading, error } = useQuery({
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Axios Interceptors với Hàng đợi (Queue)**: 
+Điều gì xảy ra nếu bạn gọi 5 API cùng lúc, cả 5 đều bị báo 401 (Hết hạn Token)? 
+Nếu code không chuẩn, bạn sẽ bắn đi 5 yêu cầu Refresh Token! 
+Cách đúng là: Khi API đầu tiên bị lỗi 401, hãy bật cờ `isRefreshing = true`, đẩy 4 API còn lại vào Hàng đợi (Queue). Đi đổi Token mới, xong xuôi thì lấy ra ghép vào 5 API cũ và gửi đi lại.
+
+**Quy tắc vàng**:
+1. Axios và React Query có vai trò riêng. Axios = Đứa chạy việc giao hàng. React Query = Cái tủ lạnh lưu hàng. Đừng nhầm lẫn.
+2. Luôn cài `timeout` cho Axios để app không bị treo nếu server chết.
+
+</details>
 
 ### Axios Instance with Token Refresh Queue
 
@@ -215,7 +305,15 @@ export default defineConfig({
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Dưới đây là thiết lập cơ bản cho React Query. `staleTime: 5 phút` nghĩa là trong vòng 5 phút sau lần gọi đầu tiên, nếu có chỗ nào khác đòi gọi dữ liệu này, React Query sẽ đưa đồ cũ ra xài mà không thèm gọi mạng. `gcTime` (Garbage Collection) nghĩa là sau 10 phút không xài tới thì nó sẽ bị xóa khỏi RAM trình duyệt.
+
+</details>
 
 ### React Query Configuration
 

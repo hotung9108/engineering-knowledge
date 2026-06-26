@@ -2,6 +2,14 @@
 
 > Architectural patterns for production frontend applications. Covers API layer design with automatic token refresh, frontend security (XSS, CSRF, CSP), and scaling strategies with monorepos and micro-frontends.
 
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Các pattern kiến trúc cho ứng dụng frontend cấp production. Bao gồm thiết kế tầng API (API layer) với tính năng tự động làm mới token, bảo mật frontend (XSS, CSRF, CSP), và các chiến lược mở rộng (scaling) với monorepo và micro-frontends.
+
+</details>
+
 ---
 
 ## Prerequisites

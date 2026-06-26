@@ -1,10 +1,51 @@
 # Frontend Security
 
-> A comprehensive guide to frontend security covering XSS (Cross-Site Scripting), CSRF (Cross-Site Request Forgery), secure token storage strategies (HttpOnly Cookies vs. localStorage), and Content Security Policy (CSP). Frontend security vulnerabilities directly target end users and their sessions.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Hướng dẫn toàn diện về bảo mật frontend bao gồm XSS (Cross-Site Scripting), CSRF (Cross-Site Request Forgery), các chiến lược lưu trữ token an toàn (HttpOnly Cookies vs. localStorage), và Content Security Policy (CSP). Các lỗ hổng bảo mật frontend nhắm trực tiếp vào người dùng cuối và phiên làm việc (session) của họ.
+
+</details>
+
+> **Summary**: A comprehensive guide to frontend security covering XSS (Cross-Site Scripting), CSRF (Cross-Site Request Forgery), secure token storage strategies (HttpOnly Cookies vs. localStorage), and Content Security Policy (CSP). Frontend security vulnerabilities directly target end users and their sessions.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn đang xây một ngôi nhà (Website):
+- **XSS**: Kẻ trộm lén viết một câu thần chú lên bức tường nhà bạn. Bất kỳ ai vào nhà đọc câu đó sẽ tự động móc ví đưa tiền cho hắn. (Phòng ngừa: Dùng sơn chống chữ - Xóa hết thẻ `<script>` mà user nhập vào).
+- **Lưu trữ Token sai cách**: Bạn để chìa khóa két sắt (Access Token) ngay trên bàn phòng khách (`localStorage`). Trộm vào nhà là thấy ngay. (Phòng ngừa: Giấu chìa khóa vào két ẩn của ngân hàng — `HttpOnly Cookie`, chỉ ngân hàng mới lấy được).
+- **CSRF**: Kẻ trộm gửi cho bạn một gói bưu phẩm. Khi bạn ký nhận, trên giấy biên nhận có ghi dòng chữ nhỏ "Tôi đồng ý chuyển toàn bộ tài sản cho kẻ trộm". Bạn đang phê duyệt giao dịch mà không hề hay biết!
+
+</details>
+
+Imagine you are building a house (Website):
+- **XSS**: A thief secretly writes a magic spell on your wall. Anyone who walks in and reads it automatically hands over their wallet to the thief. (Prevention: Use anti-magic paint — Sanitize all `<script>` tags entered by users).
+- **Improper Token Storage**: You leave the safe key (Access Token) right on the living room table (`localStorage`). Any thief walking in grabs it immediately. (Prevention: Hide the key in a bank vault — `HttpOnly Cookie`, which only the bank can access).
+- **CSRF**: A thief sends you a package. When you sign for it, the receipt has tiny text saying, "I agree to transfer all my assets to the thief." You are approving a transaction without even knowing it!
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Bảo mật Frontend** là tập hợp các phương pháp để bảo vệ ứng dụng web khỏi các cuộc tấn công khai thác môi trường của trình duyệt. Khác với backend (bảo vệ máy chủ và cơ sở dữ liệu), bảo mật frontend bảo vệ phiên đăng nhập (session), cookie, và dữ liệu cá nhân của người dùng.
+
+**Phân loại:**
+- **Loại**: Kỷ luật Bảo mật Ứng dụng.
+- **Mối đe dọa chính**: XSS, CSRF, Clickjacking, Trộm token (Token theft), Tấn công chuỗi cung ứng (Supply chain).
+- **Các lớp phòng thủ**: Làm sạch dữ liệu đầu vào (Sanitization), Header CSP, thuộc tính Cookie an toàn.
+
+</details>
 
 **Frontend Security** encompasses the practices and mechanisms used to protect web applications from attacks that exploit the client-side execution environment (browser). Unlike backend security, frontend attacks target the user's browser session, cookies, and personal data.
 
@@ -15,7 +56,22 @@
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Trình duyệt rất "ngây thơ". Nó sẽ chạy mọi đoạn mã JavaScript mà nó thấy trên trang, bất kể mã đó là của bạn viết hay do hacker lén tiêm vào. Backend không thể cứu bạn nếu lỗi nằm ở cách trình duyệt hiển thị dữ liệu.
+
+| Mối đe dọa | Hậu quả | Trách nhiệm của Frontend |
+|---|---|---|
+| XSS (Chạy mã độc) | Cướp phiên đăng nhập, trộm dữ liệu | Làm sạch input, tránh dùng `innerHTML`, thiết lập CSP |
+| CSRF (Giả mạo yêu cầu) | Thực hiện hành động trái phép thay người dùng | Dùng cookie `SameSite`, token chống CSRF |
+| Trộm Token | Chiếm đoạt hoàn toàn tài khoản | Dùng cookie `HttpOnly` thay vì `localStorage` |
+| Clickjacking | Lừa người dùng click vào nút ẩn | Dùng header `X-Frame-Options` / `frame-ancestors` |
+
+</details>
 
 Browsers execute arbitrary JavaScript from any origin that manages to inject it into a page. This trust model creates attack surfaces that backend security alone cannot address:
 
@@ -28,7 +84,16 @@ Browsers execute arbitrary JavaScript from any origin that manages to inject it 
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Không có bảo mật: Bạn cho phép người dùng viết bình luận. Một hacker viết bình luận chứa thẻ `<script>` gửi cookie về server của hắn. Bất kỳ ai mở bài viết đó lên đọc đều bị mất tài khoản ngay lập tức.
+Có bảo mật: Bạn dùng thư viện (như `DOMPurify`) quét sạch mã độc trước khi hiển thị. Hacker viết `<script>`, thư viện sẽ xóa nó đi, chỉ giữ lại chữ thuần túy.
+
+</details>
 
 ### Without proper security
 
@@ -69,7 +134,19 @@ function Comment({ html }: { html: string }) {
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Nền tảng nội dung người dùng tạo (UGC)** — Bình luận blog, diễn đàn, bộ gõ văn bản phong phú (Rich Text) BẮT BUỘC phải làm sạch XSS.
+2. **Luồng xác thực (Authentication)** — Lưu trữ token an toàn và làm mới tự động.
+3. **Quản lý script bên thứ ba** — Nhúng mã Google Analytics, Ads, Chatbox (Rủi ro chuỗi cung ứng).
+4. **Thanh toán E-commerce** — Bảo vệ CSRF cho form giỏ hàng và thanh toán.
+5. **Dashboard Admin** — Yêu cầu quyền cao nhất nên phải có bảo vệ nhiều lớp (CSP + Auth chặt chẽ + CSRF).
+
+</details>
 
 1. **User-generated content platforms** — Blog comments, forum posts, rich text editors require XSS sanitization.
 2. **Authentication flows** — Secure token storage and automatic token refresh.
@@ -79,7 +156,22 @@ function Comment({ html }: { html: string }) {
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**1. Lưu trữ Token an toàn (Đặc biệt quan trọng)**:
+Đừng BAO GIỜ lưu Access Token (JWT) trong `localStorage`. Bất kỳ lỗi XSS nào dù nhỏ nhất cũng sẽ khiến hacker đọc được chuỗi đó bằng lệnh `localStorage.getItem()`. Thay vào đó, Backend phải trả về `Set-Cookie: HttpOnly`. Cookie này được Trình duyệt giấu đi, JavaScript không thể đọc, nhưng trình duyệt tự biết cách gửi kèm khi gọi API.
+
+**2. Tránh xa dangerouslySetInnerHTML**:
+Nếu bạn phải dùng nó để render HTML (như nội dung Blog từ CMS), bắt buộc phải chạy qua hàm `DOMPurify.sanitize(html)` trước tiên.
+
+**3. Content Security Policy (CSP)**:
+Một tấm khiên phòng thủ cuối cùng. Bạn gửi lệnh cho Trình duyệt: "Chỉ được phép chạy Script có nguồn gốc từ domain của tôi, cấm tải từ domain khác". Dù XSS có lọt qua, trình duyệt cũng sẽ từ chối chạy đoạn mã đó vì vi phạm CSP.
+
+</details>
 
 ### XSS Prevention
 
@@ -143,7 +235,15 @@ Even if an XSS vulnerability exists, CSP prevents the injected script from loadi
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Next.js cung cấp cách thiết lập CSP Header toàn cục dễ dàng trong file `next.config.ts`. Điều này chặn hoàn toàn các cuộc tấn công Clickjacking và hạn chế nguồn tải script.
+
+</details>
 
 ### Next.js CSP Configuration
 
