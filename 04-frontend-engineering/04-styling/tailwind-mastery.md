@@ -1,10 +1,48 @@
 # Tailwind CSS Mastery
 
-> An advanced guide to Tailwind CSS covering deep configuration, the class conflict problem and its solution (`tailwind-merge` + `clsx`), variant-based component design with CVA (Class Variance Authority), and custom plugin authoring. Tailwind is the dominant styling approach for modern React applications.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Hướng dẫn nâng cao về Tailwind CSS bao gồm cấu hình chuyên sâu, giải quyết vấn đề xung đột class (`tailwind-merge` + `clsx`), thiết kế component dựa trên các biến thể (variants) với CVA (Class Variance Authority), và cách viết custom plugin. Tailwind hiện là phương pháp styling thống trị cho các ứng dụng React hiện đại.
+
+</details>
+
+> **Summary**: An advanced guide to Tailwind CSS covering deep configuration, the class conflict problem and its solution (`tailwind-merge` + `clsx`), variant-based component design with CVA (Class Variance Authority), and custom plugin authoring. Tailwind is the dominant styling approach for modern React applications.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Thay vì viết thư gửi thợ mộc: "Làm cho tôi một cái bàn màu đỏ, cao 80cm, mặt bàn bo tròn", sau đó chờ họ làm xong (CSS truyền thống).
+Với Tailwind, bạn có sẵn một đống gạch Lego ghi rõ: "Cục đỏ", "Cục dài 80cm", "Cục góc tròn". Bạn tự lấy gạch xếp thành cái bàn ngay tại chỗ. Nhanh hơn gấp 10 lần và không bao giờ phải nghĩ tên cho cái bàn đó là `red-table` hay `table-rounded`.
+
+</details>
+
+Instead of writing a letter to a carpenter saying: "Build me a table that is red, 80cm tall, and has rounded corners," and waiting for them to build it (Traditional CSS).
+With Tailwind, you have a bucket of Lego bricks labeled: "Red Brick", "80cm Brick", "Rounded Brick". You just grab the bricks and snap the table together yourself on the spot. It's 10x faster and you never have to waste time inventing a name like `red-table` or `table-rounded`.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Tailwind CSS** là một framework CSS theo trường phái "tiện ích lên hàng đầu" (utility-first). Nó cung cấp các class nhỏ bé (như `bg-blue-500`, `p-4`, `rounded-lg`) để bạn xây dựng giao diện trực tiếp trong file HTML/JSX. Khác với Bootstrap, Tailwind không cung cấp sẵn các Component (như cái Nút hay cái Thẻ), nó chỉ cung cấp các vật liệu xây dựng.
+
+**Phân loại:**
+- **Loại**: Utility-first CSS framework.
+- **Xử lý**: Lúc Build (JIT compiler quét mã nguồn và chỉ lấy đúng những class bạn đã gõ).
+- **Chi phí khi chạy**: Zero — xuất ra một file `.css` bình thường.
+- **Dung lượng**: Thường rất nhỏ, chỉ khoảng 5-15KB khi nén (gzipped).
+
+</details>
 
 **Tailwind CSS** is a utility-first CSS framework that provides low-level utility classes (e.g., `bg-blue-500`, `p-4`, `rounded-lg`) for building designs directly in HTML/JSX. Unlike component-based frameworks (Bootstrap), Tailwind does not impose design opinions — it provides atomic building blocks.
 
@@ -16,7 +54,19 @@
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Các cách viết CSS cũ (BEM, CSS Modules, CSS-in-JS) đều bắt lập trình viên phải tự nghĩ ra tên class, tổ chức file, và chiến đấu với việc class này đè class kia. Tailwind giải quyết bằng cách:
+- Không cần nghĩ tên class nữa, cứ lấy Lego mà lắp.
+- File CSS không bao giờ phình to (vì JIT compiler sẽ tự xóa các class không xài).
+- Không phải nhảy qua nhảy lại giữa file JS và file CSS.
+- Giao diện luôn đồng nhất vì Tailwind ép bạn dùng một hệ thống kích cỡ/màu sắc có sẵn.
+
+</details>
 
 Traditional CSS approaches (BEM, CSS Modules, CSS-in-JS) all require developers to invent class names, manage file organization, and fight specificity conflicts. Tailwind eliminates these problems by:
 
@@ -30,7 +80,16 @@ Traditional CSS approaches (BEM, CSS Modules, CSS-in-JS) all require developers 
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Nếu không có Tailwind: Bạn phải tạo file `.css`, nghĩ ra tên `.button-primary`, viết một đống thuộc tính dài dòng, rồi import vào file React.
+Nếu có Tailwind: Gõ thẳng `className="bg-blue-500 text-white p-4"` ngay trong file React. Xong!
+
+</details>
 
 ### Without Tailwind — Traditional CSS
 
@@ -78,7 +137,21 @@ function Button({ children }: { children: React.ReactNode }) {
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Phát triển UI siêu tốc**: Làm giao diện nhanh gấp 2-3 lần viết CSS thông thường.
+2. **Làm thư viện Component**: Dùng Tailwind + thư viện `CVA` + `tailwind-merge` để tạo ra các nút bấm, thẻ có thể tùy biến dễ dàng mà không lỗi.
+3. **Làm Responsive (Điện thoại/PC) & Dark mode**: Rất nhàn nhã vì chỉ cần thêm tiền tố như `md:` hoặc `dark:` trước class.
+
+**Khi nào KHÔNG HỢP**:
+- Đội ngũ code đã quá quen và yêu thích CSS Modules.
+- Website có hiệu ứng CSS chạy bằng tọa độ Javascript liên tục (Drag & Drop quá phức tạp).
+
+</details>
 
 1. **Rapid UI development** — Build production-quality layouts 2-3x faster than traditional CSS.
 2. **Design systems** — Tailwind's theme configuration serves as a single source of truth for design tokens.
@@ -94,7 +167,19 @@ function Button({ children }: { children: React.ReactNode }) {
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Vấn đề lớn nhất của Tailwind là đụng độ Class (Class Conflict)**:
+Nếu cái Nút có sẵn màu Xanh (`bg-blue-500`), mà bạn truyền thêm prop màu Đỏ (`bg-red-500`), trình duyệt sẽ KHÔNG biết lấy màu nào! Màu nào nằm dưới cùng trong file CSS sinh ra sẽ thắng, không phụ thuộc vào việc bạn gõ màu nào trước.
+=> **Giải pháp**: Bắt buộc phải dùng hàm `cn()` (kết hợp `clsx` và `tailwind-merge`) cho mọi Component để nó tự hiểu màu Đỏ sẽ đè màu Xanh.
+
+**CVA (Class Variance Authority)**: Thư viện giúp bạn tạo ra nhiều phiên bản cho một Component (Button màu Primary, Button màu Đỏ, Size nhỏ, Size to) một cách rõ ràng và an toàn kiểu dữ liệu (Type-safe).
+
+</details>
 
 ### Deep Configuration (Design Tokens)
 
@@ -268,7 +353,15 @@ module.exports = {
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Bạn cần tạo file tiện ích `utils.ts` chứa hàm `cn` để tái sử dụng ở mọi component, và cài đặt các thư viện cần thiết.
+
+</details>
 
 ### Complete `cn` Utility Setup
 
@@ -301,7 +394,15 @@ export function cn(...inputs: ClassValue[]): string {
 
 ---
 
-## 7. Cheatsheet
+## Layer 7: Cheatsheet
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Bảng tóm tắt các nhóm class thường dùng nhất của Tailwind.
+
+</details>
 
 | Category | Utilities | Example |
 |---|---|---|

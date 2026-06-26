@@ -2,6 +2,14 @@
 
 > Technical analysis of CSS strategy trade-offs for modern React applications. Covers the runtime cost of CSS-in-JS, zero-runtime alternatives, CSS Modules, and advanced Tailwind CSS patterns including `tailwind-merge`, CVA, and custom plugins.
 
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Phân tích kỹ thuật về sự đánh đổi (trade-offs) giữa các chiến lược CSS cho ứng dụng React hiện đại. Bao gồm chi phí runtime của CSS-in-JS, các giải pháp thay thế zero-runtime, CSS Modules, và các pattern nâng cao trong Tailwind CSS bao gồm `tailwind-merge`, CVA, và viết custom plugin.
+
+</details>
+
 ---
 
 ## Prerequisites

@@ -1,10 +1,51 @@
 # CSS Architecture and Performance
 
-> A technical analysis of CSS strategy trade-offs for modern frontend applications, comparing Runtime CSS-in-JS, Zero-Runtime CSS-in-JS, CSS Modules, and Utility-first approaches. The choice of CSS architecture has direct impact on bundle size, rendering performance, and Server Component compatibility.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Phân tích kỹ thuật về sự đánh đổi của các chiến lược CSS cho ứng dụng frontend hiện đại, so sánh Runtime CSS-in-JS, Zero-Runtime CSS-in-JS, CSS Modules, và cách tiếp cận Utility-first. Việc lựa chọn kiến trúc CSS có tác động trực tiếp đến dung lượng bundle, hiệu năng render và khả năng tương thích với Server Component.
+
+</details>
+
+> **Summary**: A technical analysis of CSS strategy trade-offs for modern frontend applications, comparing Runtime CSS-in-JS, Zero-Runtime CSS-in-JS, CSS Modules, and Utility-first approaches. The choice of CSS architecture has direct impact on bundle size, rendering performance, and Server Component compatibility.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn đi mua quần áo:
+- **CSS Truyền thống**: Bạn vào kho lấy áo, nhưng tất cả quần áo vứt lộn xộn trong một đống. Bạn dễ lấy nhầm áo của người khác (Lỗi trùng tên class CSS).
+- **CSS-in-JS (Styled Components)**: Bạn mua một cái máy may mang về nhà. Mỗi lần bạn cần mặc áo, bạn bật máy may lên và may ngay tại nhà. Áo cực kỳ vừa vặn, nhưng tốn tiền điện và mất thời gian may mỗi lần mặc (Chậm do tốn Javascript lúc chạy).
+- **CSS Modules / Tailwind / Zero-Runtime**: Bạn nhờ xưởng may đo sẵn tất cả áo (Build time) rồi cất vào tủ. Khi cần mặc, bạn chỉ lấy ra mặc luôn. Nhanh gọn, không tốn điện, nhưng bạn phải tuân theo kích thước đã đo sẵn. Trình duyệt hiện đại thích cách này nhất.
+
+</details>
+
+Imagine you're buying clothes:
+- **Traditional CSS**: You walk into a giant warehouse, but all the clothes are thrown into one massive pile. It's very easy to accidentally grab someone else's shirt (CSS global class name collisions).
+- **Runtime CSS-in-JS (Styled Components)**: You buy a sewing machine and keep it at home. Every time you want to wear a shirt, you turn on the machine and sew it on the spot. It fits perfectly, but it wastes electricity and takes time every time you want to wear it (Performance cost of computing CSS in the browser via JavaScript).
+- **CSS Modules / Tailwind / Zero-Runtime**: You ask a factory to tailor all your clothes in advance (at Build Time) and put them in your closet. When you need a shirt, you just put it on instantly. It's fast, uses no electricity, but you have to stick to the pre-made sizes. Modern browsers vastly prefer this.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Kiến trúc CSS** là cách tiếp cận có hệ thống để viết, tổ chức và phân phối các file CSS trong một ứng dụng web. Trong hệ sinh thái React, cuộc tranh luận lớn nhất hiện nay xoay quanh việc CSS được xử lý ở đâu — ngay trên trình duyệt lúc đang chạy (Runtime), hay được biên dịch sẵn lúc code (Build time).
+
+**Phân loại:**
+- **Loại**: Quyết định kiến trúc Frontend.
+- **Các nhóm chính**: Runtime CSS-in-JS, Zero-Runtime CSS-in-JS, CSS Modules, Utility-first CSS (Tailwind).
+- **Tác động**: Hiệu năng (dung lượng JS, tốc độ vẽ), Trải nghiệm lập trình viên, Sự tương thích với Server Component (RSC).
+
+</details>
 
 **CSS Architecture** refers to the systematic approach used to author, organize, and deliver stylesheets in a web application. In the React ecosystem, the primary debate centers on where CSS is processed — at runtime in the browser or at build time by the compiler.
 
@@ -15,7 +56,20 @@
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+CSS nguyên thủy có nhiều lỗi trầm trọng khi dự án phình to:
+- **Không gian chung (Global namespace)**: Trùng tên class.
+- **Code thừa (Dead code)**: Xóa code CSS sợ làm hỏng trang khác.
+- **Thiếu logic**: CSS không tự đổi màu theo logic của JavaScript được.
+
+CSS-in-JS (như Styled Components) sinh ra để giải quyết vấn đề trên bằng cách dùng JavaScript để quản lý CSS. Nhưng nó lại sinh ra bệnh mới: **chạy chậm** và **không tương thích với Server Components**. Từ đó dẫn tới xu hướng Zero-Runtime và Utility-first.
+
+</details>
 
 Traditional CSS has fundamental scaling problems in large applications:
 
@@ -30,7 +84,16 @@ CSS-in-JS solved these problems by scoping styles to components and enabling dyn
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Runtime CSS-in-JS bắt trình duyệt tải thư viện (JS), dịch chuỗi, tạo class ngẫu nhiên, rồi nhét thẻ `<style>` vào HTML mỗi khi render. Rất tốn kém.
+Ngược lại, Zero-Runtime (như Vanilla Extract hay CSS Modules) sẽ xuất ra một file `.css` tiêu chuẩn duy nhất lúc Build. Khi chạy, nó không tốn một giọt JavaScript nào để render CSS.
+
+</details>
 
 ### Runtime CSS-in-JS (Styled Components, Emotion)
 
@@ -86,7 +149,24 @@ export function Button() {
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+| Kịch bản | Khuyên dùng | Lý do |
+|---|---|---|
+| Next.js App Router | Tailwind hoặc CSS Modules | Không chi phí runtime; Tương thích RSC |
+| Xây dựng Design System | Vanilla Extract / CSS Modules | An toàn kiểu dữ liệu; Không làm phình bundle của người xài |
+| Cập nhật dự án cũ | Giữ nguyên CSS-in-JS | Đập đi xây lại tốn thời gian hơn hiệu năng thu được |
+| Code nhanh, Prototyping | Tailwind CSS | Tốc độ code cực kỳ nhanh |
+
+**Khi nào nên dùng Runtime CSS-in-JS**:
+- Web SPA cũ không có Server Component.
+- Yêu cầu logic thay đổi màu sắc/vị trí liên tục dựa vào tọa độ con chuột (Drag-and-drop).
+
+</details>
 
 | Scenario | Recommended Approach | Reasoning |
 |---|---|---|
@@ -104,7 +184,24 @@ export function Button() {
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**CSS Modules**: Giải pháp đơn giản và tốt nhất không cần JS. Hỗ trợ mặc định trong Next.js.
+**Thực tiễn tốt nhất**:
+1. Dùng CSS Variables (Biến) để lưu màu sắc thay vì code cứng (Design Tokens).
+2. Chọn MỘT kiến trúc duy nhất, đừng mix Tailwind với CSS Modules và CSS-in-JS cùng lúc, file CSS sẽ phình rất to.
+3. Luôn dùng kiến trúc Zero-runtime cho dự án mới.
+4. Quản lý độ ưu tiên CSS bằng `@layer` thay vì nhồi thẻ `!important`.
+
+**Lỗi thường gặp**:
+- Dùng Styled Components trong Next.js App Router: Phải ép `"use client"` lên mọi chỗ, phá hỏng toàn bộ sức mạnh của Server Component.
+- Bơm giá trị Javascript liên tục vào Styled Components khiến trình duyệt phải tính toán vẽ lại CSS (Style Recalculation) gây giật lag.
+
+</details>
 
 ### CSS Modules
 
@@ -158,7 +255,15 @@ export function Button({ children }: { children: React.ReactNode }) {
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Dưới đây là một template tạo hệ thống Màu sắc chuẩn (Design Tokens) bằng CSS Variables và chia layer để đảm bảo CSS của bạn luôn được áp dụng đúng, không bị đè bởi các thư viện khác.
+
+</details>
 
 ### CSS Variables Design Tokens
 
