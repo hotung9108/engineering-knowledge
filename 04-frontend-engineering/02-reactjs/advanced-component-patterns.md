@@ -1,10 +1,49 @@
 # Advanced Component Patterns
 
-> A practical guide to advanced React component design patterns — Compound Components, Render Props, Headless Components (Custom Hooks), and Polymorphic Components. These patterns are the foundation of building reusable, flexible, and accessible UI libraries at scale.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Hướng dẫn toàn diện về cách xây dựng các React component có khả năng tái sử dụng cao, linh hoạt và dễ mở rộng bằng cách sử dụng các design pattern nâng cao như Compound Components, Render Props, Headless Components (thông qua Hooks) và Polymorphic Components.
+
+</details>
+
+> **Summary**: A comprehensive guide to building highly reusable, flexible, and scalable React components using advanced design patterns like Compound Components, Render Props, Headless Components (Hooks), and Polymorphic Components.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Khi bạn mua một chiếc bánh sinh nhật:
+- **Component bình thường (Nhận quá nhiều Props)**: Giống như bạn gọi điện báo tiệm bánh: "Làm bánh socola, đường kính 20cm, vẽ hoa cúc, nến số 5, giao lúc 8h". Bạn phải truyền 100 thông tin (props). Nếu bạn muốn đổi hoa cúc thành hoa hồng, tiệm bánh báo: "Không được, code chúng tôi cứng nhắc rồi".
+- **Advanced Patterns**: Giống như bạn mua một cái "Bánh sinh nhật tự ghép". Tiệm bán riêng cốt bánh, kem, hoa, nến. (Headless / Compound). Tiệm lo phần chất lượng (Logic bánh), còn BẠN là người tự sắp xếp kem và nến theo đúng ý mình (Render UI). Bánh không bao giờ bị hỏng dù bạn cắm nến ở đâu.
+
+</details>
+
+When buying a birthday cake:
+- **Normal Components (Prop Drilling)**: It's like calling a bakery: "Bake a chocolate cake, 20cm, draw daisies, put a number 5 candle, deliver at 8 PM". You pass 100 instructions (props). If you want roses instead of daisies, the bakery says, "Sorry, our code is hardcoded".
+- **Advanced Patterns**: It's like buying a "DIY Cake Kit". The bakery sells the sponge, cream, flowers, and candles separately (Headless/Compound). The bakery handles the quality and physics (Logic), but YOU assemble the cream and candles exactly how you want (Rendering UI). The cake works perfectly no matter where you put the candles.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Advanced Component Patterns** là các kỹ thuật kiến trúc để thiết kế các React Component tối đa hóa khả năng tái sử dụng, tính linh hoạt và sự tách biệt mối quan tâm (separation of concerns). Chúng giải quyết sự mâu thuẫn cốt lõi giữa việc cung cấp một Component dùng được ngay (sensible defaults) và cho phép người dùng tùy biến sâu (customization).
+
+**Phân loại:**
+- **Loại**: Kiến trúc UI.
+- **Framework**: React 18+ với TypeScript.
+- **Các pattern chính**: Compound Components, Render Props, Headless UI (Custom Hooks), Polymorphic Components.
+
+</details>
 
 **Advanced Component Patterns** are architectural techniques for designing React components that maximize reusability, flexibility, and separation of concerns. They solve the fundamental tension between providing sensible defaults and allowing consumer customization.
 
@@ -15,7 +54,19 @@
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Khi các thư viện Component phình to, các thiết kế ngây ngô ban đầu sẽ gặp rào cản:
+- **Bùng nổ Props**: Truyền 20+ props chỉ để đổi màu chữ. Giải quyết bằng: **Compound Components**.
+- **Giao diện cứng nhắc**: Component tự ôm đồm việc render thẻ HTML. Giải quyết bằng: **Headless / Render Props** (Nhường quyền render cho người dùng).
+- **Thiếu an toàn kiểu dữ liệu**: Dùng prop `as` nhưng TS không gợi ý được thuộc tính. Giải quyết bằng: **Polymorphic Components**.
+- **Lặp code**: Logic giống hệt nhau ở nhiều Component. Giải quyết bằng: **Custom Hooks**.
+
+</details>
 
 As component libraries grow, naive designs hit scaling problems:
 
@@ -30,7 +81,16 @@ These patterns were formalized by library authors (Radix UI, Headless UI, Downsh
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Không có pattern: Phải truyền hàng đống cấu hình vào component con thông qua props. Rất khó đọc.
+Sử dụng Compound Component: Người dùng tự ghép thẻ `<Dropdown.Item>` vào `<Dropdown.Content>`, rõ ràng, linh hoạt, và thư viện không cần quan tâm người dùng đặt bao nhiêu mục.
+
+</details>
 
 ### Without patterns — Props explosion
 
@@ -74,7 +134,20 @@ interface DropdownProps {
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Design systems**: Dùng Compound Component cho `<Select>`, `<Accordion>`, `<Tabs>`, `<Dialog>`.
+2. **Data tables**: Dùng Headless hooks (`useTable`) cung cấp logic sắp xếp, phân trang mà không ép buộc phải dùng thẻ `<table>`.
+3. **Thư viện Form**: Dùng Render Props (Formik) hoặc Headless (React Hook Form) để quản lý state của Form.
+4. **Tooltip / Popover**: Compound Component quản lý vị trí mở, tách biệt với việc vẽ giao diện.
+
+**Khi nào KHÔNG nên dùng**: Các component quá nhỏ như `<Badge>`, `<Avatar>`. Code nguyên khối sẽ tốt hơn là over-engineer.
+
+</details>
 
 1. **Design systems** — Compound Components for `<Select>`, `<Accordion>`, `<Tabs>`, `<Dialog>`.
 2. **Data tables** — Headless hooks (`useTable`) that provide sorting, filtering, and pagination logic without dictating markup.
@@ -90,7 +163,17 @@ interface DropdownProps {
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Compound Components**: Sử dụng Context để truyền state ngầm xuống các component con. Nhờ đó người dùng có thể tự do thay đổi cấu trúc thẻ HTML.
+**Headless Components (Custom Hooks)**: Đây là tiêu chuẩn hiện đại nhất. Hook nắm giữ 100% logic, state, và các thuộc tính Accessibility (ARIA). Nó trả về các hàm (prop getters) để người dùng tự gán vào thẻ HTML của họ.
+**Polymorphic Components**: Giúp component có thể render dưới dạng các thẻ HTML khác nhau (ví dụ thẻ `<Button as="a">`) nhưng TypeScript vẫn biết cách báo lỗi nếu truyền sai thuộc tính.
+
+</details>
 
 ### Pattern 1: Compound Components
 
@@ -256,7 +339,15 @@ export function Button<E extends ElementType = "button">({
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Dưới đây là một hàm tiện ích (Factory function) giúp tạo nhanh cặp Context + Hook dùng chung cho mô hình Compound Component. Nó loại bỏ hoàn toàn các code thừa lặp đi lặp lại.
+
+</details>
 
 ### Compound Component Factory
 

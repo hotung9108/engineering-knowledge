@@ -1,6 +1,14 @@
 # 02 — ReactJS
 
-> Deep dive into React's internal architecture and advanced patterns. Covers the Fiber reconciliation engine, component design patterns for reusable UI libraries, state management paradigms, and performance tuning techniques.
+> Mastery of React beyond the basics. Focuses on rendering internals (Fiber), advanced component architecture, complex state management, and performance tuning for large-scale applications.
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Làm chủ React vượt ra khỏi các khái niệm cơ bản. Tập trung vào cơ chế render bên dưới (Fiber), kiến trúc component nâng cao, quản lý state phức tạp và tối ưu hóa hiệu năng cho các ứng dụng quy mô lớn.
+
+</details>
 
 ---
 

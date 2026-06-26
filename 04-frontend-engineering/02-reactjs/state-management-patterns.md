@@ -1,10 +1,55 @@
 # State Management Patterns
 
-> A comprehensive guide to choosing and implementing global state management in React applications, covering the distinction between Server State and Client State, and evaluating the Flux (Zustand), Atomic (Jotai), and Signals (MobX) paradigms with practical trade-off analysis.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Đi sâu vào các mô hình quản lý state hiện đại trong React. Bao gồm sự khác biệt quan trọng giữa Server State và Client State, đồng thời so sánh các kiến trúc: unidirectional (Redux/Zustand), atomic (Jotai/Recoil) và reactive signals.
+
+</details>
+
+> **Summary**: A deep dive into modern state management paradigms in React. Covers the critical distinction between Server State and Client State, and contrasts unidirectional architectures (Redux/Zustand), atomic models (Jotai/Recoil), and reactive signals.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn đang điều hành một nhà hàng:
+- **Client State (Trạng thái nội bộ)**: Bàn số 5 thích ngồi ghế gỗ hay ghế đệm, quạt đang bật hay tắt. Đây là chuyện riêng của quán bạn (Zustand, Jotai). Thay đổi lập tức, ai cũng thấy ngay.
+- **Server State (Trạng thái bên ngoài)**: Thực đơn mua nguyên liệu từ chợ. Chợ (API) có thể hết hàng, giá có thể đổi. Bạn cần cử người đi chợ (React Query), mua về cất tủ lạnh (Cache), và thỉnh thoảng phải gọi điện ra chợ hỏi xem giá có đổi không (Background Refetch).
+
+Lỗi phổ biến nhất của lập trình viên là lấy thông tin đi chợ (Server State) cất chung vào sổ ghi chép nội bộ của quán (Redux/Zustand).
+
+</details>
+
+Imagine you are running a restaurant:
+- **Client State (Internal Status)**: Does table 5 prefer wooden or padded chairs? Is the fan on or off? This is your restaurant's internal business (Zustand, Jotai). It changes instantly and locally.
+- **Server State (External Status)**: The ingredients you buy from the market. The market (API) might run out of stock, or prices might change. You need to send someone to the market (React Query), store the food in the fridge (Cache), and occasionally call the market to check if prices have updated (Background Refetch).
+
+The most common mistake developers make is writing down the market information (Server State) into the restaurant's internal notebook (Redux/Zustand).
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**State Management** (Quản lý trạng thái) trong React ám chỉ các mẫu thiết kế và công cụ dùng để chia sẻ, đồng bộ và lưu trữ dữ liệu xuyên suốt các component. Quản lý trạng thái hiện đại chia làm 2 loại khác biệt hoàn toàn:
+- **Server State**: Dữ liệu tải từ API — luôn luôn bất đồng bộ, có thể bị cũ (stale) và cần được lưu cache.
+- **Client State**: Dữ liệu chỉ liên quan đến giao diện (theme, sidebar mở/đóng, form nháp) — đồng bộ, cục bộ và tạm thời.
+
+**Phân loại:**
+- **Loại**: Kiến trúc Frontend.
+- **Hệ sinh thái**: React 18+ với TypeScript.
+- **Công cụ chính**: React Query / TanStack Query (Server State), Zustand, Jotai, Redux Toolkit, MobX (Client State).
+
+</details>
 
 **State Management** in React refers to the patterns and tools used to share, synchronize, and persist application state across components. Modern state management distinguishes between two fundamentally different categories of state:
 
@@ -18,7 +63,18 @@
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Các công cụ có sẵn của React (`useState`, `useReducer`, `useContext`) chỉ đủ dùng cho các Component nhỏ gọn. Nhưng khi ứng dụng lớn lên:
+- **Gọi API**: `useEffect` + `useState` không tự động lưu cache, tự động gọi lại khi lỗi, hay gộp các request giống nhau. React Query làm được.
+- **Share State toàn cục**: Nếu dùng `Context`, khi một giá trị đổi, TẤT CẢ các component bọc trong nó đều re-render. Zustand/Jotai cho phép chọn chính xác component nào cần re-render.
+- **Code quá dài**: Redux quá cồng kềnh, Jotai/Zustand ra đời để giữ code ngắn gọn mà vẫn mạnh mẽ.
+
+</details>
 
 React's built-in state primitives (`useState`, `useReducer`, `useContext`) are sufficient for component-local and moderately shared state. However, they break down in these scenarios:
 
@@ -34,7 +90,16 @@ React's built-in state primitives (`useState`, `useReducer`, `useContext`) are s
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Không có State Management: Bạn phải tự viết `useEffect` dài 15 dòng để gọi API, tự quản lý loading, error, biến `cancelled`. Nếu 3 nơi cùng gọi user đó, trình duyệt gửi đi 3 Request y hệt nhau.
+Có React Query + Zustand: Chỉ tốn 5 dòng code. React Query tự động gộp 3 request làm 1, tự lưu cache, tự xử lý loading. Zustand quản lý Theme cực kỳ gọn gàng.
+
+</details>
 
 ### Without proper state management
 
@@ -102,7 +167,22 @@ function ThemeDisplay() {
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+| Tình huống | Công cụ khuyên dùng | Lý do |
+|---|---|---|
+| Dữ liệu API (CRUD, phân trang) | React Query / SWR | Thiết kế riêng cho Server State |
+| Theme, sidebar, modal (Giao diện) | Zustand | Siêu nhẹ, chỉ re-render chỗ cần thiết |
+| Trình chỉnh sửa ảnh, đồ thị | Jotai | Mô hình Atomic phù hợp dữ liệu tách rời độc lập |
+| Dữ liệu real-time cực cao (Game, Trading) | MobX / Preact Signals | Phản ứng cực nhanh, bỏ qua so sánh Virtual DOM |
+| Form phức tạp | React Hook Form | Chuyên quản lý validation form |
+| Ứng dụng khổng lồ, logic rắc rối | Redux Toolkit | Rất nhiều Middleware và công cụ debug mạnh |
+
+</details>
 
 ### Choosing the right tool
 
@@ -123,7 +203,23 @@ function ThemeDisplay() {
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Thực tiễn tốt nhất**:
+1. **Tách bạch Server và Client**: Không dùng Redux/Zustand để lưu dữ liệu API. Dùng React Query.
+2. **Subscription chọn lọc**: Luôn dùng selector khi lấy state (ví dụ `useStore(state => state.theme)`). Nếu gọi trơn `useStore()`, component sẽ re-render MỌI LÚC khi bất kỳ giá trị nào trong store thay đổi.
+3. **Colocate (Để gần nhau)**: State nào chỉ 1 component dùng thì cứ xài `useState`. Đừng ép mọi thứ lên Global Store.
+4. **Dùng Middleware**: Zustand có `persist` để tự động lưu vào localStorage và `devtools` để xem state trên Redux Extension.
+
+**Lỗi hay gặp**:
+- Bọc toàn bộ App vào 1 file Context khổng lồ khiến ứng dụng giật lag vì re-render liên tục.
+- Tổ chức state quá sâu (nested objects). Hãy làm phẳng dữ liệu.
+
+</details>
 
 ### Zustand — Production Patterns
 
@@ -201,7 +297,17 @@ function DoubledDisplay() {
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Dưới đây là kiến trúc tiêu chuẩn trong các dự án lớn:
+1. `useUser` (React Query): Chỉ chịu trách nhiệm fetch, cache, và cập nhật API.
+2. `useNotificationStore` (Zustand): Chỉ chịu trách nhiệm quản lý thông báo (UI State) đẩy lên góc màn hình. Hai thế giới này hoàn toàn tách biệt.
+
+</details>
 
 ### React Query + Zustand Integration Template
 

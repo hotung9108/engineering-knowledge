@@ -1,10 +1,49 @@
 # React Performance Tuning
 
-> A comprehensive guide to understanding React's re-render mechanics and applying optimization techniques including `React.memo`, `useCallback`, `useMemo`, Component Composition, Code Splitting, and the upcoming React Compiler. Optimization without measurement is premature — profile first, optimize second.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Hướng dẫn toàn diện để hiểu cơ chế re-render của React và áp dụng các kỹ thuật tối ưu hóa bao gồm `React.memo`, `useCallback`, `useMemo`, Component Composition, Code Splitting và React Compiler sắp ra mắt. Tối ưu hóa mà không đo lường là sự vội vàng — hãy profile trước, tối ưu sau.
+
+</details>
+
+> **Summary**: A comprehensive guide to understanding React's re-render mechanics and applying optimization techniques including `React.memo`, `useCallback`, `useMemo`, Component Composition, Code Splitting, and the upcoming React Compiler. Optimization without measurement is premature — profile first, optimize second.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Bạn là một họa sĩ đang vẽ một bức tranh phong cảnh có cái cây và mặt trời. 
+- **Không tối ưu**: Khi khách hàng bảo "Đổi mặt trời thành màu đỏ", bạn vứt cả bức tranh đi, lấy giấy mới vẽ lại từ đầu cả cái cây lẫn mặt trời (Re-render toàn bộ). Rất tốn sức!
+- **Tối ưu hóa (React Performance Tuning)**: Bạn vẽ mặt trời trên một tờ giấy trong suốt, và vẽ cái cây trên một tờ khác. Khi đổi màu mặt trời, bạn chỉ vẽ lại tờ giấy mặt trời, tờ giấy vẽ cây được giữ nguyên (React.memo). Bạn đỡ mệt hơn rất nhiều.
+
+</details>
+
+Imagine you are a painter drawing a landscape with a tree and a sun.
+- **Unoptimized**: When the client says "Make the sun red", you throw the entire painting in the trash, get a new canvas, and redraw both the tree and the sun from scratch (Full Re-render). Exhausting!
+- **Optimized (React Performance Tuning)**: You paint the sun on one transparent sheet, and the tree on another. When the sun changes color, you only redraw the sun sheet, keeping the tree sheet exactly as it was (`React.memo`). You save a massive amount of effort.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**React Performance Tuning** là kỷ luật giảm thiểu các công việc thừa thãi trong quá trình render của React. Mặc định, React sẽ tự động vẽ lại (re-render) toàn bộ các component con nếu component cha bị vẽ lại, bất kể props của component con có đổi hay không. Tối ưu hiệu năng là việc can thiệp vào quá trình này để bỏ qua các bước vẽ lại không cần thiết.
+
+**Phân loại:**
+- **Loại**: Kỷ luật tối ưu Frontend.
+- **Framework**: React 18+ với TypeScript.
+- **Các API chính**: `React.memo`, `useMemo`, `useCallback`, `React.lazy`, `Suspense`, `useTransition`, `useDeferredValue`.
+
+</details>
 
 **React Performance Tuning** is the discipline of minimizing unnecessary work in React's rendering pipeline. React's default behavior is to re-render an entire subtree whenever a parent re-renders, regardless of whether child props have changed. Performance tuning intervenes in this process to skip unnecessary re-renders.
 
@@ -15,7 +54,15 @@
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Mặc định React đã rất nhanh. Tuy nhiên, hiệu năng sẽ sụp đổ trong các trường hợp: bảng dữ liệu khổng lồ (1000+ dòng), form phức tạp (gõ một chữ mà cả form giật tung), hoặc khi tính toán quá nặng lúc render làm tụt frame. Hiểu được **khi nào và tại sao** React re-render là điều kiện tiên quyết để tối ưu.
+
+</details>
 
 React is fast by default for most applications. However, performance degrades in these scenarios:
 
@@ -30,7 +77,16 @@ Understanding **when and why** React re-renders is the prerequisite for all opti
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Nếu không tối ưu, mỗi lần component Cha re-render, nó sẽ tạo ra một hàm `handleClick` mới tinh, khiến cho component Con (`ExpensiveChild`) tưởng là có dữ liệu mới nên cũng re-render theo, dù ta đã bọc Con bằng `React.memo`.
+Để giải quyết, ta dùng `useCallback` và `useMemo` để "cố định" địa chỉ ô nhớ của hàm và object, giúp `React.memo` hoạt động đúng.
+
+</details>
 
 ### Without optimization — Cascading re-renders
 
@@ -96,7 +152,22 @@ const ExpensiveChild = React.memo(function ExpensiveChild({
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Bảng dữ liệu lớn (Data grids)**: Dùng `React.memo` cho các dòng (row); dùng `useMemo` cho dữ liệu đã tính toán.
+2. **Dashboard thời gian thực**: Dùng `useTransition` cho các cập nhật dữ liệu không gấp; thiết lập Zustand để chỉ update một phần (selective subscriptions).
+3. **Form khổng lồ**: Tách riêng state của từng input để không làm cả form re-render.
+4. **Code Splitting theo trang (Route)**: Dùng `React.lazy` + `Suspense`.
+
+**Khi KHÔNG NÊN tối ưu**:
+- Nếu chưa thấy lag, đừng tối ưu (Premature optimization).
+- Không dùng `React.memo` cho mấy thẻ quá đơn giản như `<span>` hay `<div>` vì nó làm code chậm đi do phải tốn công đi so sánh props.
+
+</details>
 
 1. **Data grids and virtualized lists** — `React.memo` on row components; `useMemo` for computed data.
 2. **Real-time dashboards** — `useTransition` for non-urgent data updates; selective Zustand subscriptions.
@@ -115,7 +186,21 @@ const ExpensiveChild = React.memo(function ExpensiveChild({
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Luật Re-render của React**:
+1. State của chính nó thay đổi.
+2. Cái Context mà nó lắng nghe thay đổi.
+3. Component Cha của nó bị re-render. (React KHÔNG tự so sánh props, bạn phải bọc `React.memo` nó mới chịu so sánh).
+
+**Tối ưu bằng Composition (Đỉnh cao không cần Hook)**:
+Cách xịn nhất là cấu trúc lại HTML (JSX) để tránh re-render. Nhét các component nặng vào thuộc tính `children`. Khi cha đổi màu (state), component truyền vào `children` trước đó sẽ không bị ảnh hưởng.
+
+</details>
 
 ### React Re-render Rules
 
@@ -205,7 +290,15 @@ function Dashboard() {
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Dưới đây là một template danh sách được tối ưu hoàn toàn. Nó tính toán (filter) nhanh hơn nhờ `useMemo`, và mỗi dòng (row) được bọc bởi `React.memo` cộng thêm hàm `onSelect` bọc bằng `useCallback`, đảm bảo chỉ có dòng nào được click mới re-render.
+
+</details>
 
 ### Performance-Optimized List Component
 

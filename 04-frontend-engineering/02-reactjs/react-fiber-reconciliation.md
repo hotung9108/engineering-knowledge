@@ -1,10 +1,49 @@
 # React Fiber and Reconciliation
 
-> A deep dive into React's internal rendering architecture, covering the Fiber data structure, the two-phase render model (Render Phase and Commit Phase), Time Slicing, and Concurrent Rendering. Understanding these internals is essential for diagnosing performance issues and leveraging React 18+ concurrent features.
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+> **Tóm tắt**: Đi sâu vào engine render cốt lõi của React (Fiber), giải thích cách cơ chế reconciliation hoạt động bên dưới, cách quá trình render được chia thành các phase, và cách Concurrent Mode mang lại trải nghiệm người dùng mượt mà không chặn luồng chính (main thread).
+
+</details>
+
+> **Summary**: A deep dive into React's core rendering engine (Fiber), explaining how reconciliation works under the hood, how rendering is split into phases, and how Concurrent Mode enables smooth user experiences without blocking the main thread.
 
 ---
 
-## 1. What is it? (What)
+## ELI5 (Explain Like I'm 5)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Hãy tưởng tượng bạn đang dọn dẹp một căn nhà 10 tầng:
+- **Trước đây (Không có Fiber)**: Bạn bắt đầu lau từ tầng 1 lên tầng 10, không nghỉ. Nếu có người gõ cửa (User click), bạn bỏ mặc họ đứng ngoài đến khi lau xong cả 10 tầng mới ra mở cửa. Giao diện bị đơ!
+- **Hiện tại (Có Fiber)**: Bạn lau một phòng, sau đó ngừng lại ngó ra cửa sổ xem có ai bấm chuông không. Nếu có, bạn ra mở cửa ngay, phục vụ họ xong, rồi mới quay lại lau tiếp phòng thứ hai (Interruptible Rendering). Nếu việc lau dọn quá lâu, bạn chia nhỏ ra lau từng chút một (Time Slicing) để khách đến nhà luôn được tiếp đón ngay lập tức.
+
+</details>
+
+Imagine you are cleaning a 10-story house:
+- **Before (Without Fiber)**: You start sweeping from floor 1 to floor 10 without stopping. If someone knocks on the door (a User click), you ignore them until you finish all 10 floors. The UI freezes!
+- **Now (With Fiber)**: You sweep one room, then pause to check if anyone is at the door. If there is, you open the door, help them immediately, and then go back to sweep the next room (Interruptible Rendering). If the cleaning task is huge, you break it into tiny pieces (Time Slicing) so that guests are always greeted instantly.
+
+---
+
+## Layer 1: What is it? (What)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**React Fiber** là bộ máy tính toán (reconciliation engine) nội bộ được giới thiệu từ React 16 để thay thế Stack Reconciler cũ. Một "Fiber" thực chất chỉ là một object JavaScript đơn giản đại diện cho một **đơn vị công việc** — mỗi thẻ/component trong cây React tương ứng với một Fiber node.
+
+**Phân loại:**
+- **Loại**: Thuật toán so sánh Virtual DOM / Rendering engine.
+- **Ra mắt**: React 16 (2017), hoàn thiện Concurrent Mode ở React 18 (2022).
+- **Thay thế**: Stack Reconciler (React 15 trở xuống).
+
+</details>
 
 **React Fiber** is the internal reconciliation engine introduced in React 16 that replaced the original Stack Reconciler. A Fiber is a plain JavaScript object representing a **unit of work** — each React element in the tree corresponds to a Fiber node.
 
@@ -30,7 +69,20 @@ graph TD
 
 ---
 
-## 2. Why does it exist? (Why)
+## Layer 2: Why does it exist? (Why)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Trước React 16, việc tính toán render là **đồng bộ và đệ quy**. Khi cập nhật dữ liệu lớn, React khóa toàn bộ luồng chính (main thread) cho đến khi tính xong. Lúc này:
+- Trình duyệt không nhận click hay gõ phím.
+- Animation bị đứng hình.
+- Giao diện bị đơ.
+
+Fiber ra đời để khắc phục triệt để vấn đề này bằng cách chia nhỏ công việc và cho phép "tạm dừng".
+
+</details>
 
 ### The Problem with Stack Reconciler (React 15)
 
@@ -51,7 +103,16 @@ Before React 16, the reconciliation process was **synchronous and recursive**. W
 
 ---
 
-## 3. Without vs. With Comparison (Compare)
+## Layer 3: Without vs. With Comparison (Compare)
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Không có Fiber: Khi tìm kiếm trên 10.000 kết quả, trình duyệt treo luôn 200ms, bạn gõ phím không hiện chữ.
+Có Fiber: Nó render kết quả ở mức ưu tiên THẤP, lâu lâu tạm dừng để trình duyệt hiện phím bạn vừa gõ, sau đó render tiếp. Trải nghiệm cực kỳ mượt mà.
+
+</details>
 
 ### Without Fiber (Stack Reconciler)
 
@@ -86,7 +147,18 @@ User types in search box
 
 ---
 
-## 4. Common Use Cases
+## Layer 4: Common Use Cases
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+1. **Render danh sách cực dài**: Dùng `useTransition` để hạ độ ưu tiên của việc cập nhật danh sách, giữ cho ô input gõ luôn mượt.
+2. **Chuyển Tab**: Dùng `useDeferredValue` để giao diện tab đổi ngay lập tức, còn nội dung bên trong từ từ load sau.
+3. **Dashboard Real-time**: Đảm bảo dữ liệu update liên tục không làm đơ giao diện điều khiển.
+4. **Giao diện chặn loading (Suspense)**: Cấu trúc của Fiber cho phép render từng phần (progressive hydration).
+
+</details>
 
 1. **Large list rendering** — `useTransition` marks list updates as low priority, keeping the search input responsive.
 2. **Tab switching** — `useDeferredValue` defers expensive tab content rendering while showing the tab header immediately.
@@ -101,7 +173,17 @@ User types in search box
 
 ---
 
-## 5. Deep Practice
+## Layer 5: Deep Practice
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+**Mô hình 2 Phase:**
+1. **Render Phase (Có thể bị ngắt quãng)**: React đi qua từng Component, so sánh Virtual DOM cũ/mới và lên danh sách các thay đổi. Quá trình này có thể bị tạm dừng, hủy bỏ hoặc chạy lại từ đầu. *Đó là lý do TUYỆT ĐỐI không gọi API hay gọi hàm thay đổi bên ngoài trong thân component.*
+2. **Commit Phase (Đồng bộ, Không thể ngắt quãng)**: React gom tất cả các thay đổi tìm được ở phase 1 và "ốp" thẳng vào Real DOM một lần. Khi đã bắt đầu phase này là không thể dừng lại. Sau khi ốp xong, trình duyệt vẽ màn hình, rồi `useEffect` mới được chạy.
+
+</details>
 
 ### The Two-Phase Render Model
 
@@ -162,7 +244,15 @@ This is the mechanism behind `useTransition` and `useDeferredValue` in React 18.
 
 ---
 
-## 6. Code Templates and Integration
+## Layer 6: Code Templates and Integration
+
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Đoạn code sử dụng `useTransition` để tạo tính năng tìm kiếm phản hồi ngay tức khắc. Khi gõ phím, hàm `setQuery` chạy ở mức ưu tiên CAO giúp input thay đổi ngay lập tức. Cùng lúc, `startTransition` sẽ tính toán kết quả lọc ở mức ưu tiên THẤP, không cản trở việc gõ phím.
+
+</details>
 
 ### useTransition for Responsive Search
 
