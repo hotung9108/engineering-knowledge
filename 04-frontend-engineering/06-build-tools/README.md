@@ -2,6 +2,14 @@
 
 > Deep dive into frontend build tooling and deployment infrastructure. Covers Vite vs Webpack internal architectures, bundle optimization, CI pipeline design, containerized deployment, and safe release strategies.
 
+<details>
+<summary>🇻🇳 <b>Hiển thị bản dịch Tiếng Việt</b></summary>
+<br>
+
+Đi sâu vào các công cụ build (build tooling) và hạ tầng triển khai (deployment infrastructure) của frontend. Bao gồm kiến trúc bên trong của Vite và Webpack, tối ưu hóa bundle, thiết kế pipeline CI, triển khai bằng container (Docker), và các chiến lược phát hành (release) an toàn.
+
+</details>
+
 ---
 
 ## Prerequisites
